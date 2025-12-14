@@ -79,6 +79,9 @@ Base de backend PHP con arquitectura limpia/hexagonal, estándares PSR y medidas
 - **Companies**: CRUD básico con ajustes fiscales/idioma en `CompanyController` (`store`, `update`, `destroy`, `updateSettings`) y contactos (`addContact`, `removeContact`), respaldado por `CompanyRepository`, `CompanySettingsRepository` y `CompanyContactRepository`.
 - **Usuarios y roles**: `UserController` permite crear usuarios con membresía activa en empresa (`CreateUserUseCase`), listar miembros (`ListCompanyUsersUseCase`), sincronizar roles (`SyncUserRolesUseCase`) y crear roles por empresa (`CreateRoleUseCase`). Los repositorios `RoleRepository` y `UserRoleRepository` gestionan catálogos y asignaciones.
 - **Auditoría global**: `AuditLoggerMiddleware` persiste en `audit_logs` cada solicitud procesada (actor, company, acción, IP, user-agent) con saneamiento de metadatos sensibles.
+- **Freelancers**: `FreelancerController` expone alta y actualización de perfiles/skills (`CreateFreelancerUseCase`, `UpdateFreelancerProfileUseCase`) y un listado paginado que retorna perfil y habilidades.
+- **Projects**: `ProjectController` crea y actualiza proyectos multi-empresa, lista con paginación y agrega miembros (`AddProjectMemberUseCase`) para alinear con políticas de autorización.
+- **Assignments**: `AssignmentController` asigna freelancers a proyectos con rol, fechas y estado (`CreateAssignmentUseCase`) y lista asignaciones por proyecto (`ListAssignmentsByProjectUseCase`).
 
 ## Flujo de desarrollo recomendado
 1. Implementa casos de uso en `app/Application` y entidades/value objects en `app/Domain`.
