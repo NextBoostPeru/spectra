@@ -5,6 +5,16 @@ import LoginPage from './LoginPage';
 import RegisterPage from './RegisterPage';
 import { getStoredSession, persistSession, clearSession } from './session';
 
+function resolveApiUrl() {
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+
+  if (window?.location?.hostname?.includes('nextboostperu.com')) {
+    return 'https://appspectra.nextboostperu.com';
+  }
+
+  return 'http://localhost:8000';
+}
+
 function AppRoutes() {
   const [session, setSession] = useState(getStoredSession);
   const navigate = useNavigate();
@@ -24,7 +34,7 @@ function AppRoutes() {
     navigate('/login', { replace: true });
   };
 
-  const apiUrl = useMemo(() => import.meta.env.VITE_API_URL || 'http://localhost:8000', []);
+  const apiUrl = useMemo(() => resolveApiUrl(), []);
 
   return (
     <Routes>
