@@ -22,10 +22,12 @@
     },
     "scripts": {
         "format": "php-cs-fixer fix --config=.php-cs-fixer.dist.php",
-        "lint": "php -l",
-        "phpstan": "phpstan analyse",
+        "lint": "php-cs-fixer fix --config=.php-cs-fixer.dist.php --dry-run --diff",
+        "analyse": "phpstan analyse",
+        "migrate": "php database/migrate.php",
         "test": [
-            "@phpstan"
+            "@lint",
+            "@analyse"
         ]
     },
     "minimum-stability": "stable",
