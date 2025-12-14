@@ -11,7 +11,18 @@ function resolveApiUrl() {
     return 'https://appspectra.nextboostperu.com';
   }
 
-  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  if (import.meta.env.VITE_API_URL) {
+    try {
+      const parsed = new URL(import.meta.env.VITE_API_URL);
+      if (parsed.hostname.includes('appspectra.nextboostperu.com')) {
+        parsed.protocol = 'https:';
+        return parsed.toString().replace(/\/$/, '');
+      }
+      return parsed.toString().replace(/\/$/, '');
+    } catch (e) {
+      return import.meta.env.VITE_API_URL;
+    }
+  }
 
   return 'http://localhost:8000';
 }

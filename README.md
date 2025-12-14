@@ -47,7 +47,7 @@ Hay dos opciones disponibles en la carpeta `frontend/`:
      npm run dev -- --host
      ```
    - Abre el navegador en `http://localhost:5173` y usa el formulario de inicio de sesión o el registro temporal. El color principal del UI es `#006d71` y se usa la tipografía Poppins.
-   - Configura la variable `VITE_API_URL` (por ejemplo, `https://appspectra.nextboostperu.com`); si no se define, la app intenta usar ese host en HTTPS cuando detecta `nextboostperu.com` o recurre a `http://localhost:8000`.
+   - Configura la variable `VITE_API_URL` (por ejemplo, `https://appspectra.nextboostperu.com`). Si apuntas al dominio `appspectra.nextboostperu.com` aunque uses `http`, la SPA fuerza `https` para evitar redirecciones que rompen el preflight CORS; sin valor, usa automáticamente ese host en `https` cuando detecta `nextboostperu.com` o recurre a `http://localhost:8000` para desarrollo local.
    - Al iniciar sesión se guarda el token y se redirige a un dashboard básico que muestra el nombre, correo y rol del usuario junto con próximos pasos.
 
 2. **HTML estático anterior:**
