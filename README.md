@@ -32,7 +32,11 @@ El API valida que la tabla exista, infiere columnas y llave primaria desde `info
 - `POST /api/login` con cuerpo JSON `{ "email": "correo", "password": "secreto" }` devuelve el usuario y un token de sesión efímero.
 - El endpoint actualiza `last_login_at` del usuario y responde 401 cuando las credenciales no son válidas.
 
-### Frontend en React
+### Registro temporal de administrador
+- `POST /api/register` con cuerpo `{ "full_name": "Nombre", "email": "correo", "password": "secreto" }` crea un usuario activo con rol `super_admin`.
+- Pensado solo para el arranque inicial; elimina o deshabilita la ruta cuando ya cuentes con cuentas reales.
+
+## Frontend en React
 Hay dos opciones disponibles en la carpeta `frontend/`:
 
 1. **SPA en React (recomendada):**
@@ -42,7 +46,7 @@ Hay dos opciones disponibles en la carpeta `frontend/`:
      npm install
      npm run dev -- --host
      ```
-   - Abre el navegador en `http://localhost:5173` y usa el formulario de inicio de sesión. El color principal del UI es `#006d71`.
+   - Abre el navegador en `http://localhost:5173` y usa el formulario de inicio de sesión o el registro temporal. El color principal del UI es `#006d71` y se usa la tipografía Poppins.
    - Configura la variable `VITE_API_URL` (por ejemplo, `http://localhost:8000`) para apuntar al backend; si no se define, usa ese valor por defecto.
    - Al iniciar sesión se guarda el token y se redirige a un dashboard básico que muestra el nombre, correo y rol del usuario junto con próximos pasos.
 

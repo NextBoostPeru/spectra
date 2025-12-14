@@ -51,4 +51,14 @@ if ($table === 'login') {
     return;
 }
 
+if ($table === 'register') {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        Response::error('Solo se permite el método POST para registro', 405);
+        return;
+    }
+
+    $authController->registerAdmin();
+    return;
+}
+
 $controller->handle($table, $id, $_SERVER['REQUEST_METHOD']);

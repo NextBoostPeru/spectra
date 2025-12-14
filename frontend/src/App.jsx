@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Dashboard from './Dashboard';
 import LoginPage from './LoginPage';
+import RegisterPage from './RegisterPage';
 import { getStoredSession, persistSession, clearSession } from './session';
 
 function AppRoutes() {
@@ -31,6 +32,7 @@ function AppRoutes() {
         path="/login"
         element={<LoginPage onLogin={handleLogin} apiUrl={apiUrl} existingSession={session} />}
       />
+      <Route path="/register" element={<RegisterPage apiUrl={apiUrl} />} />
       <Route
         path="/dashboard"
         element={
