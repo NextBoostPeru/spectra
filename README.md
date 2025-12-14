@@ -32,8 +32,19 @@ El API valida que la tabla exista, infiere columnas y llave primaria desde `info
 - `POST /api/login` con cuerpo JSON `{ "email": "correo", "password": "secreto" }` devuelve el usuario y un token de sesión efímero.
 - El endpoint actualiza `last_login_at` del usuario y responde 401 cuando las credenciales no son válidas.
 
-### Frontend de ejemplo
-Se incluye `frontend/login.html`, construido con React 18 y Tailwind vía CDN. Usa el color principal `#006d71` y permite indicar la URL completa del endpoint `/api/login` para que funcione aun cuando el frontend y backend estén en orígenes distintos.
+### Frontend en React
+Hay dos opciones disponibles en la carpeta `frontend/`:
 
-1. Levanta el backend PHP (por ejemplo `php -S localhost:8000 -t public`).
-2. Abre el archivo HTML en tu navegador (servido por otro origen o como archivo local), escribe la URL de la API en el campo **URL de la API** y realiza el inicio de sesión.
+1. **SPA en React (recomendada):**
+   - Instala dependencias (requiere acceso a npm):
+     ```bash
+     cd frontend
+     npm install
+     npm run dev -- --host
+     ```
+   - Abre el navegador en `http://localhost:5173` y usa el formulario de inicio de sesión. El color principal del UI es `#006d71`.
+   - Configura la variable `VITE_API_URL` (por ejemplo, `http://localhost:8000`) para apuntar al backend; si no se define, usa ese valor por defecto.
+   - Al iniciar sesión se guarda el token y se redirige a un dashboard básico que muestra el nombre, correo y rol del usuario junto con próximos pasos.
+
+2. **HTML estático anterior:**
+   - Se mantiene `frontend/login.html` con React + Tailwind vía CDN. Úsalo si no quieres instalar dependencias; indica manualmente la URL del endpoint `/api/login`.
