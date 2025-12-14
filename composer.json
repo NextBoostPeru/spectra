@@ -28,6 +28,7 @@
         "analyse": "phpstan analyse",
         "migrate": "php database/migrate.php migrate",
         "seed": "php database/migrate.php seed",
+        "serve": "php -S 0.0.0.0:8000 -t public",
         "test": [
             "@lint",
             "@analyse"

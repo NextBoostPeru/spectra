@@ -1,0 +1,1557 @@
+{
+    "info": {
+        "name": "Spectra API v1",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "description": "Colecci\u00f3n para probar la API de Spectra (v1) con autenticaci\u00f3n JWT y encabezado de tenant."
+    },
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "exec": [
+                    "const token = pm.environment.get('access_token');",
+                    "if (token) { pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` }); }",
+                    "const tenantHeader = pm.environment.get('tenant_header_name') || 'X-Tenant-Id';",
+                    "const tenantId = pm.environment.get('tenant_id');",
+                    "if (tenantId) { pm.request.headers.upsert({ key: tenantHeader, value: tenantId }); }"
+                ],
+                "type": "text/javascript"
+            }
+        }
+    ],
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const res = pm.response.json();",
+                                    "const data = res.data || {};",
+                                    "if (data.access_token) { pm.environment.set('access_token', data.access_token); }",
+                                    "if (data.refresh_token) { pm.environment.set('refresh_token', data.refresh_token); }",
+                                    "pm.test('respondi\u00f3 token de acceso', () => pm.expect(data.access_token).to.be.a('string'));"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{login_email}}\",\n  \"password\": \"{{login_password}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Refresh",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const res = pm.response.json();",
+                                    "const data = res.data || {};",
+                                    "if (data.access_token) { pm.environment.set('access_token', data.access_token); }",
+                                    "if (data.refresh_token) { pm.environment.set('refresh_token', data.refresh_token); }",
+                                    "pm.test('respondi\u00f3 token renovado', () => pm.expect(data.access_token).to.exist);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/refresh",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "refresh"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/logout",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "logout"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Switch Company",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"company_id\": \"{{tenant_id}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/switch-company",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "switch-company"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Companies",
+            "item": [
+                {
+                    "name": "List Companies",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/companies?page=1&page_size=10",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "page_size",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Company",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"legal_name\": \"ACME Corp\",\n  \"trade_name\": \"ACME\",\n  \"country_id\": 1,\n  \"default_currency_id\": 1,\n  \"timezone\": \"UTC\",\n  \"settings\": {\n    \"language\": \"es\"\n  },\n  \"contacts\": [\n    {\"name\": \"Jane Doe\", \"email\": \"jane@example.com\", \"type\": \"billing\"}\n  ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/companies",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Company",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"company_id\": \"{{tenant_id}}\",\n  \"trade_name\": \"ACME Latam\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/companies/{{tenant_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{tenant_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Company",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/companies/{{tenant_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{tenant_id}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"company_id\": \"{{tenant_id}}\"\n}"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Company Settings",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"company_id\": \"{{tenant_id}}\",\n  \"settings\": {\"language\": \"es\", \"timezone\": \"UTC\"}\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/companies/{{tenant_id}}/settings",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{tenant_id}}",
+                                "settings"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Add Company Contact",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"company_id\": \"{{tenant_id}}\",\n  \"name\": \"Billing Contact\",\n  \"email\": \"billing@example.com\",\n  \"type\": \"billing\",\n  \"is_primary\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/companies/{{tenant_id}}/contacts",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{tenant_id}}",
+                                "contacts"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Remove Company Contact",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"company_id\": \"{{tenant_id}}\",\n  \"contact_id\": \"contact-uuid\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/companies/{{tenant_id}}/contacts/contact-uuid",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{tenant_id}}",
+                                "contacts",
+                                "contact-uuid"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Users & Roles",
+            "item": [
+                {
+                    "name": "Create User",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Ana Admin\",\n  \"email\": \"ana@example.com\",\n  \"password\": \"StrongPass123!\",\n  \"company_id\": \"{{tenant_id}}\",\n  \"roles\": [\"owner\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/users",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "users"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List Company Users",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/companies/{{tenant_id}}/users?page=1&page_size=10",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{tenant_id}}",
+                                "users"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "page_size",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Role",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"company_id\": \"{{tenant_id}}\",\n  \"name\": \"Approver\",\n  \"permissions\": [\"projects.manage\", \"timesheets.approve\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/companies/{{tenant_id}}/roles",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{tenant_id}}",
+                                "roles"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Sync User Roles",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"company_id\": \"{{tenant_id}}\",\n  \"user_id\": \"user-uuid\",\n  \"roles\": [\"approver\", \"viewer\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/companies/{{tenant_id}}/users/user-uuid/roles",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{tenant_id}}",
+                                "users",
+                                "user-uuid",
+                                "roles"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Freelancers",
+            "item": [
+                {
+                    "name": "Create Freelancer",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"company_id\": \"{{tenant_id}}\",\n  \"name\": \"John Freelancer\",\n  \"email\": \"john@example.com\",\n  \"skills\": [\"php\", \"laravel\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/freelancers",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "freelancers"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Freelancer Profile",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"freelancer_id\": \"freelancer-uuid\",\n  \"rate\": 80,\n  \"skills\": [\"php\", \"symfony\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/freelancers/freelancer-uuid",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "freelancers",
+                                "freelancer-uuid"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List Freelancers",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/freelancers?page=1&page_size=20",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "freelancers"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "page_size",
+                                    "value": "20"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Projects & Assignments",
+            "item": [
+                {
+                    "name": "Create Project",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"company_id\": \"{{tenant_id}}\",\n  \"name\": \"New Project\",\n  \"code\": \"PRJ-001\",\n  \"start_date\": \"2024-01-01\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/projects",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "projects"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Project",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"project_id\": \"project-uuid\",\n  \"name\": \"Project Updated\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/projects/project-uuid",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "projects",
+                                "project-uuid"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List Projects",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/projects?page=1&page_size=10",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "projects"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "page_size",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Add Project Member",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"project_id\": \"project-uuid\",\n  \"user_id\": \"user-uuid\",\n  \"role\": \"manager\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/projects/project-uuid/members",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "projects",
+                                "project-uuid",
+                                "members"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Assignment",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"company_id\": \"{{tenant_id}}\",\n  \"project_id\": \"project-uuid\",\n  \"freelancer_id\": \"freelancer-uuid\",\n  \"role\": \"developer\",\n  \"start_date\": \"2024-01-01\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/assignments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "assignments"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List Assignments By Project",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/projects/project-uuid/assignments?page=1&page_size=10",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "projects",
+                                "project-uuid",
+                                "assignments"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "page_size",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Contracts",
+            "item": [
+                {
+                    "name": "Create Contract Template",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"company_id\": \"{{tenant_id}}\",\n  \"name\": \"MSA\",\n  \"body\": \"Base terms...\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/contract-templates",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "contract-templates"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "List Contract Templates",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/contract-templates",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "contract-templates"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Contract",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"company_id\": \"{{tenant_id}}\",\n  \"template_id\": \"template-uuid\",\n  \"external_id\": \"CNT-001\",\n  \"currency\": \"USD\",\n  \"amount\": 10000\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/contracts",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "contracts"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Add Contract Version",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"contract_id\": \"contract-uuid\",\n  \"version\": 2,\n  \"file_url\": \"https://example.com/contract-v2.pdf\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/contracts/contract-uuid/versions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "contracts",
+                                "contract-uuid",
+                                "versions"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Send Contract For Signature",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"contract_id\": \"contract-uuid\",\n  \"signers\": [{\"name\": \"Signer\", \"email\": \"signer@example.com\"}]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/contracts/contract-uuid/send",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "contracts",
+                                "contract-uuid",
+                                "send"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Approve Contract",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"contract_id\": \"contract-uuid\",\n  \"approved_by\": \"user-uuid\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/contracts/contract-uuid/approve",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "contracts",
+                                "contract-uuid",
+                                "approve"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Request Contract Approval",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"contract_id\": \"contract-uuid\",\n  \"amount\": 10000,\n  \"currency\": \"USD\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/contracts/contract-uuid/approval-request",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "contracts",
+                                "contract-uuid",
+                                "approval-request"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Onboarding",
+            "item": [
+                {
+                    "name": "Create Checklist",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"company_id\": \"{{tenant_id}}\",\n  \"name\": \"Ingreso Freelancers\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/onboarding/checklists",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "onboarding",
+                                "checklists"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Add Checklist Item",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"checklist_id\": \"checklist-uuid\",\n  \"title\": \"Cuenta de correo\",\n  \"type\": \"access\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/onboarding/checklists/checklist-uuid/items",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "onboarding",
+                                "checklists",
+                                "checklist-uuid",
+                                "items"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Assign Checklist",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"checklist_id\": \"checklist-uuid\",\n  \"subject_type\": \"user\",\n  \"subject_id\": \"user-uuid\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/onboarding/checklists/checklist-uuid/assignments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "onboarding",
+                                "checklists",
+                                "checklist-uuid",
+                                "assignments"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Complete Assignment Item",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"assignment_item_id\": \"assignment-item-uuid\",\n  \"evidence\": \"url\",\n  \"notes\": \"Listo\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/onboarding/assignments/assignment-uuid/items/assignment-item-uuid/complete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "onboarding",
+                                "assignments",
+                                "assignment-uuid",
+                                "items",
+                                "assignment-item-uuid",
+                                "complete"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "List Assignments",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/onboarding/assignments?page=1&page_size=10",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "onboarding",
+                                "assignments"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "page_size",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Deliverables",
+            "item": [
+                {
+                    "name": "Create Deliverable",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"company_id\": \"{{tenant_id}}\",\n  \"project_id\": \"project-uuid\",\n  \"title\": \"Entrega 1\",\n  \"due_date\": \"2024-02-01\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/deliverables",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "deliverables"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Submit Deliverable",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"deliverable_id\": \"deliverable-uuid\",\n  \"url\": \"https://example.com/artifact.zip\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/deliverables/deliverable-uuid/submit",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "deliverables",
+                                "deliverable-uuid",
+                                "submit"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Review Deliverable",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"deliverable_id\": \"deliverable-uuid\",\n  \"decision\": \"approved\",\n  \"comments\": \"Bien hecho\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/deliverables/deliverable-uuid/review",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "deliverables",
+                                "deliverable-uuid",
+                                "review"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "List Deliverables",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/deliverables?page=1&page_size=10",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "deliverables"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "page_size",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Record NPS Response",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"project_id\": \"project-uuid\",\n  \"score\": 9,\n  \"comment\": \"Excelente servicio\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/projects/project-uuid/nps",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "projects",
+                                "project-uuid",
+                                "nps"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Timesheets",
+            "item": [
+                {
+                    "name": "Create Timesheet",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"company_id\": \"{{tenant_id}}\",\n  \"assignment_id\": \"assignment-uuid\",\n  \"work_date\": \"2024-02-10\",\n  \"hours\": 8,\n  \"description\": \"Implementaci\u00f3n\",\n  \"auto_submit\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/timesheets",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "timesheets"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Submit Timesheet",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"timesheet_id\": \"timesheet-uuid\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/timesheets/timesheet-uuid/submit",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "timesheets",
+                                "timesheet-uuid",
+                                "submit"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Approve Timesheet",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"timesheet_id\": \"timesheet-uuid\",\n  \"approved_by\": \"user-uuid\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/timesheets/timesheet-uuid/approve",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "timesheets",
+                                "timesheet-uuid",
+                                "approve"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Reject Timesheet",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"timesheet_id\": \"timesheet-uuid\",\n  \"reason\": \"Faltan horas\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/timesheets/timesheet-uuid/reject",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "timesheets",
+                                "timesheet-uuid",
+                                "reject"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Lock Timesheet",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"timesheet_id\": \"timesheet-uuid\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/timesheets/timesheet-uuid/lock",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "timesheets",
+                                "timesheet-uuid",
+                                "lock"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "List Timesheets",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/assignments/assignment-uuid/timesheets?page=1&page_size=10",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "assignments",
+                                "assignment-uuid",
+                                "timesheets"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "page_size",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Approvals",
+            "item": [
+                {
+                    "name": "Start Approval Request",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"company_id\": \"{{tenant_id}}\",\n  \"object_type\": \"contract\",\n  \"object_id\": \"contract-uuid\",\n  \"amount\": 10000,\n  \"currency\": \"USD\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/approvals",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "approvals"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Resolve Approval Step",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"approval_request_id\": \"approval-uuid\",\n  \"step_id\": \"step-uuid\",\n  \"decision\": \"approved\",\n  \"comment\": \"ok\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/approvals/approval-uuid/steps/step-uuid",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "approvals",
+                                "approval-uuid",
+                                "steps",
+                                "step-uuid"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Request Requisition Approval",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"requisition_id\": \"req-uuid\",\n  \"company_id\": \"{{tenant_id}}\",\n  \"amount\": 5000,\n  \"currency\": \"USD\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/requisitions/req-uuid/approval-request",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "requisitions",
+                                "req-uuid",
+                                "approval-request"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Request Payroll Run Approval",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"payroll_run_id\": \"payroll-uuid\",\n  \"company_id\": \"{{tenant_id}}\",\n  \"amount\": 20000,\n  \"currency\": \"USD\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/payroll-runs/payroll-uuid/approval-request",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "payroll-runs",
+                                "payroll-uuid",
+                                "approval-request"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -113,3 +113,13 @@ Base de backend PHP con arquitectura limpia/hexagonal, estándares PSR y medidas
   composer seed
   ```
 - Los seeds incluyen países, monedas, permisos base y crean roles por cada compañía existente.
+
+## Pruebas manuales con Postman
+- Levanta el servidor embebido para pruebas locales:
+  ```bash
+  composer serve
+  ```
+- Importa la colección `docs/postman/spectra.postman_collection.json` y el ambiente `docs/postman/spectra.postman_environment.json`.
+- Ajusta el ambiente: `base_url` (p.ej. `http://localhost:8000`), `tenant_header_name`/`tenant_id` y las credenciales de `login_email`/`login_password`.
+- Ejecuta **Auth > Login** para guardar automáticamente `access_token` y `refresh_token` en el ambiente; las demás requests heredan el header `Authorization: Bearer {{access_token}}` y el header de tenant configurado.
+- Usa los endpoints agrupados (Companies, Users & Roles, Projects, Contracts, Onboarding, Deliverables, Timesheets, Approvals) para validar flujos. El formato de respuesta esperado es `{ data, meta, errors }` con paginación y códigos de error normalizados.
