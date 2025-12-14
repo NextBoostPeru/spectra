@@ -27,3 +27,13 @@ Las rutas siguen el patrón `/api/{tabla}`:
 - `DELETE /api/{tabla}/{id}`: Elimina el registro.
 
 El API valida que la tabla exista, infiere columnas y llave primaria desde `information_schema`, y omite campos desconocidos en inserciones/actualizaciones.
+
+### Login
+- `POST /api/login` con cuerpo JSON `{ "email": "correo", "password": "secreto" }` devuelve el usuario y un token de sesión efímero.
+- El endpoint actualiza `last_login_at` del usuario y responde 401 cuando las credenciales no son válidas.
+
+### Frontend de ejemplo
+Se incluye `frontend/login.html` con React 18 y Tailwind vía CDN para consumir el login desde un origen separado.
+
+1. Levanta el backend PHP (por ejemplo `php -S localhost:8000 -t public`).
+2. Abre el archivo HTML en tu navegador (servido por otro origen o como archivo local) y apunta `API_URL` al backend.
