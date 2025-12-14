@@ -16,24 +16,13 @@ $database = new Database($config['db']);
 $controller = new GenericController($database, $config['pagination']);
 $authController = new AuthController($database);
 
-// Allow both HTTP and HTTPS variants of the approved hostnames and avoid preflight redirects.
-$allowedHosts = [
-    'localhost:5173',
-    'appspectra.nextboostperu.com',
-];
-
+// Refined CORS: always echo the requesting origin (when provided) so dev hosts like
+// http://localhost:5173 can call the remote API without hitting redirect-based preflight errors.
 $origin = $_SERVER['HTTP_ORIGIN'] ?? null;
 
 if ($origin) {
-    $parsed = parse_url($origin);
-    $originHost = ($parsed['host'] ?? null) . (isset($parsed['port']) ? ':' . $parsed['port'] : '');
-
-    if ($originHost && in_array($originHost, $allowedHosts, true)) {
-        header('Access-Control-Allow-Origin: ' . $origin);
-        header('Access-Control-Allow-Credentials: true');
-    } else {
-        header('Access-Control-Allow-Origin: *');
-    }
+    header('Access-Control-Allow-Origin: ' . $origin);
+    header('Access-Control-Allow-Credentials: true');
 } else {
     header('Access-Control-Allow-Origin: *');
 }
