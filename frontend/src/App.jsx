@@ -6,11 +6,12 @@ import RegisterPage from './RegisterPage';
 import { getStoredSession, persistSession, clearSession } from './session';
 
 function resolveApiUrl() {
-  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
-
   if (window?.location?.hostname?.includes('nextboostperu.com')) {
+    // Fuerza HTTPS en el entorno desplegado para evitar redirecciones de CORS.
     return 'https://appspectra.nextboostperu.com';
   }
+
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
 
   return 'http://localhost:8000';
 }

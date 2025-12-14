@@ -16,18 +16,24 @@ $database = new Database($config['db']);
 $controller = new GenericController($database, $config['pagination']);
 $authController = new AuthController($database);
 
-$allowedOrigins = [
-    'http://localhost:5173',
-    'https://localhost:5173',
-    'http://appspectra.nextboostperu.com',
-    'https://appspectra.nextboostperu.com',
+// Allow both HTTP and HTTPS variants of the approved hostnames and avoid preflight redirects.
+$allowedHosts = [
+    'localhost:5173',
+    'appspectra.nextboostperu.com',
 ];
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? null;
 
-if ($origin && in_array($origin, $allowedOrigins, true)) {
-    header('Access-Control-Allow-Origin: ' . $origin);
-    header('Access-Control-Allow-Credentials: true');
+if ($origin) {
+    $parsed = parse_url($origin);
+    $originHost = ($parsed['host'] ?? null) . (isset($parsed['port']) ? ':' . $parsed['port'] : '');
+
+    if ($originHost && in_array($originHost, $allowedHosts, true)) {
+        header('Access-Control-Allow-Origin: ' . $origin);
+        header('Access-Control-Allow-Credentials: true');
+    } else {
+        header('Access-Control-Allow-Origin: *');
+    }
 } else {
     header('Access-Control-Allow-Origin: *');
 }
