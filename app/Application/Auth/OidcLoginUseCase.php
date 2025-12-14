@@ -6,6 +6,7 @@ namespace App\Application\Auth;
 
 use App\Application\Contracts\UseCase;
 use App\Application\Exceptions\ApplicationException;
+use App\Domain\Repositories\CompanyUserRepositoryInterface;
 use App\Domain\Repositories\UserIdentityRepositoryInterface;
 use App\Domain\Repositories\UserRepositoryInterface;
 use App\Domain\Repositories\UserSessionRepositoryInterface;
@@ -15,6 +16,7 @@ class OidcLoginUseCase implements UseCase
     public function __construct(
         private readonly UserIdentityRepositoryInterface $identities,
         private readonly UserRepositoryInterface $users,
+        private readonly CompanyUserRepositoryInterface $companyUsers,
         private readonly UserSessionRepositoryInterface $sessions,
         private readonly OidcValidator $validator,
         private readonly JwtTokenManager $jwt,
@@ -67,11 +69,24 @@ class OidcLoginUseCase implements UseCase
 
         $user->assertCanLogin();
 
+        $activeCompany = $this->companyUsers->findActiveForUser($user->id());
+
+        if ($activeCompany === null) {
+            throw new ApplicationException('El usuario no tiene compañías asignadas.');
+        }
+
+        if (! $activeCompany->isActive()) {
+            $activeCompany = $this->companyUsers->setActiveCompany($user->id(), $activeCompany->companyId());
+        }
+
         $refreshToken = bin2hex(random_bytes(64));
         $refreshHash = hash('sha256', $refreshToken);
 
         $session = $this->sessions->create($user->id(), $refreshHash, $ip, $userAgent);
-        $accessToken = $this->jwt->createAccessToken($user->id(), $session->id(), ['idp' => $provider]);
+        $accessToken = $this->jwt->createAccessToken($user->id(), $session->id(), [
+            'idp' => $provider,
+            'company_id' => $activeCompany->companyId(),
+        ]);
 
         $this->identities->linkIdentity($user->id(), $provider, $subject, (bool) ($claims['email_verified'] ?? false));
 

@@ -8,7 +8,9 @@ use App\Application\Auth\LoginUserUseCase;
 use App\Application\Auth\OidcLoginUseCase;
 use App\Application\Auth\LogoutUserUseCase;
 use App\Application\Auth\RefreshTokenUseCase;
+use App\Application\Auth\SwitchActiveCompanyUseCase;
 use App\Application\Exceptions\ApplicationException;
+use App\Interface\Http\Middleware\ActiveCompanyResolver;
 use App\Interface\Http\Middleware\RateLimiter;
 use App\Interface\Http\Requests\RequestValidator;
 use InvalidArgumentException;
@@ -19,9 +21,11 @@ class AuthController extends Controller
         private readonly LoginUserUseCase $login,
         private readonly LogoutUserUseCase $logout,
         private readonly RefreshTokenUseCase $refresh,
+        private readonly SwitchActiveCompanyUseCase $switchCompany,
         private readonly ?OidcLoginUseCase $oidcLogin,
         private readonly RequestValidator $validator,
         private readonly RateLimiter $rateLimiter,
+        private readonly ActiveCompanyResolver $companyResolver,
         private readonly array $securityConfig,
     ) {
     }
@@ -123,6 +127,32 @@ class AuthController extends Controller
                 'nonce' => $payload['nonce'],
                 'expected_nonce' => $payload['expected_nonce'],
                 'id_token_claims' => $payload['id_token_claims'],
+                'ip' => $request['ip'] ?? null,
+                'user_agent' => $request['user_agent'] ?? null,
+            ]);
+
+            return $this->ok($result);
+        } catch (InvalidArgumentException|ApplicationException $exception) {
+            return $this->error($exception->getMessage(), 400);
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $request
+     */
+    public function switchCompany(array $request): string
+    {
+        try {
+            $payload = $this->validator->validate($request, [
+                'company_id' => static fn ($value): bool => is_string($value) && $value !== '',
+            ]);
+
+            $context = $this->companyResolver->resolve($request);
+
+            $result = ($this->switchCompany)([
+                'user_id' => $context['user_id'],
+                'session_id' => $context['session_id'],
+                'company_id' => $payload['company_id'],
                 'ip' => $request['ip'] ?? null,
                 'user_agent' => $request['user_agent'] ?? null,
             ]);

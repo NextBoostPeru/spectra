@@ -6,6 +6,7 @@ namespace App\Application\Auth;
 
 use App\Application\Contracts\UseCase;
 use App\Application\Exceptions\ApplicationException;
+use App\Domain\Repositories\CompanyUserRepositoryInterface;
 use App\Domain\Repositories\UserRepositoryInterface;
 use App\Domain\Repositories\UserSessionRepositoryInterface;
 
@@ -13,6 +14,7 @@ class RefreshTokenUseCase implements UseCase
 {
     public function __construct(
         private readonly UserRepositoryInterface $users,
+        private readonly CompanyUserRepositoryInterface $companyUsers,
         private readonly UserSessionRepositoryInterface $sessions,
         private readonly JwtTokenManager $jwt,
         private readonly int $refreshTtlDays,
@@ -59,11 +61,23 @@ class RefreshTokenUseCase implements UseCase
             throw new ApplicationException($exception->getMessage(), previous: $exception);
         }
 
+        $activeCompany = $this->companyUsers->findActiveForUser($user->id());
+
+        if ($activeCompany === null) {
+            throw new ApplicationException('El usuario no tiene compañías asignadas.');
+        }
+
+        if (! $activeCompany->isActive()) {
+            $activeCompany = $this->companyUsers->setActiveCompany($user->id(), $activeCompany->companyId());
+        }
+
         $newRefreshToken = bin2hex(random_bytes(64));
         $newRefreshHash = hash('sha256', $newRefreshToken);
 
         $updatedSession = $this->sessions->rotateToken($session->id(), $newRefreshHash, $ip, $userAgent);
-        $accessToken = $this->jwt->createAccessToken($updatedSession->userId(), $updatedSession->id());
+        $accessToken = $this->jwt->createAccessToken($updatedSession->userId(), $updatedSession->id(), [
+            'company_id' => $activeCompany->companyId(),
+        ]);
 
         return [
             'access_token' => $accessToken,

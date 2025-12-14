@@ -44,4 +44,19 @@ abstract class PdoRepository
 
         return sprintf('%s %s %s IS NULL', $normalized, $hasWhere ? 'AND' : 'WHERE', $column);
     }
+
+    /**
+     * Añade un filtro obligatorio por company_id a consultas multi-tenant.
+     */
+    protected function withCompanyScope(string $query, string $companyId, ?string $alias = null, string $column = 'company_id'): string
+    {
+        $columnName = $alias !== null && $alias !== ''
+            ? sprintf('%s.%s', $alias, $column)
+            : $column;
+
+        $normalized = rtrim($query);
+        $hasWhere = stripos($normalized, ' where ') !== false;
+
+        return sprintf('%s %s %s = %s', $normalized, $hasWhere ? 'AND' : 'WHERE', $columnName, $this->connection->quote($companyId));
+    }
 }

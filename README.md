@@ -22,7 +22,7 @@ Base de backend PHP con arquitectura limpia/hexagonal, estándares PSR y medidas
    ```bash
    cp .env.example .env
    ```
-2. Ajusta credenciales y seguridad en `.env` (dominios CORS, rate limiting, CSP, `FORCE_HTTPS`).
+2. Ajusta credenciales y seguridad en `.env` (dominios CORS, rate limiting, CSP, `FORCE_HTTPS`, `TENANT_HEADER`).
 3. Instala dependencias:
    ```bash
    composer install
@@ -57,6 +57,7 @@ Base de backend PHP con arquitectura limpia/hexagonal, estándares PSR y medidas
 - **Rate limiting**: `AuthController` protege `login` por IP usando la política de `config/security.php`.
 - **Logout y revocación**: `LogoutUserUseCase` marca la sesión como `revoked` por hash de refresh token.
 - **SSO preparado**: `OidcLoginUseCase` valida `state`, `nonce`, `aud`, `iss`, `exp` y usa `user_identities` para vincular Google/Microsoft.
+- **Multi-empresa**: los tokens incluyen `company_id` (reclamación configurable) y el middleware `ActiveCompanyResolver` valida que el usuario pertenezca a la empresa indicada en el token o en el header `TENANT_HEADER`. El cambio de contexto emite nuevas credenciales mediante `SwitchActiveCompanyUseCase` (rota refresh token) y `PdoRepository::withCompanyScope()` permite filtrar consultas tenant por `company_id`.
 
 ## Flujo de desarrollo recomendado
 1. Implementa casos de uso en `app/Application` y entidades/value objects en `app/Domain`.

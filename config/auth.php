@@ -28,4 +28,8 @@ return [
             ],
         ],
     ],
+    'tenant' => [
+        'company_header' => env('TENANT_HEADER', 'X-Company-ID'),
+        'company_claim' => 'company_id',
+    ],
 ];

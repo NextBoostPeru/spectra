@@ -29,6 +29,7 @@ Este backend sigue principios de Clean Architecture/Hexagonal, separando respons
 - **Logging**: usar `App\Infrastructure\Logging\Logger` con canales por módulo (`new Logger('billing')`). Los contextos se serializan a JSON.
 - **Paginación**: `PaginationRequest` define entrada estándar (`page`, `perPage`, `sortBy`, `direction`) y `PaginationResult` entrega `data` + `meta` (`total`, `page`, `per_page`, `pages`).
 - **Soft delete**: cuando la tabla incluye `deleted_at`, aplica el helper `withSoftDeleteScope()` de `PdoRepository` para excluir registros eliminados lógicamente en cada consulta.
+- **Multi-tenant**: toda consulta a datos de compañía debe incluir el helper `withCompanyScope()` usando el `company_id` resuelto por `ActiveCompanyResolver` o derivado del token JWT.
 
 ## Flujo de dependencias
 
