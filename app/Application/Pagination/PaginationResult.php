@@ -18,12 +18,12 @@ final class PaginationResult
         public readonly array $items,
         public readonly int $total,
         public readonly int $page,
-        public readonly int $perPage
+        public readonly int $pageSize
     ) {
     }
 
     /**
-     * @return array{data:list<TItem>,meta:array<string,int>}
+     * @return array{data:list<TItem>,meta:array<string,int|bool>}
      */
     public function toArray(): array
     {
@@ -32,8 +32,8 @@ final class PaginationResult
             'meta' => [
                 'total' => $this->total,
                 'page' => $this->page,
-                'per_page' => $this->perPage,
-                'pages' => (int) ceil($this->total / max(1, $this->perPage)),
+                'page_size' => $this->pageSize,
+                'has_next' => $this->total > $this->page * max(1, $this->pageSize),
             ],
         ];
     }

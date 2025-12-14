@@ -11,7 +11,7 @@ final class PaginationRequest
 {
     public function __construct(
         public readonly int $page = 1,
-        public readonly int $perPage = 15,
+        public readonly int $pageSize = 15,
         public readonly ?string $sortBy = null,
         public readonly string $direction = 'asc'
     ) {
@@ -19,6 +19,6 @@ final class PaginationRequest
 
     public function offset(): int
     {
-        return max(0, ($this->page - 1) * $this->perPage);
+        return max(0, ($this->page - 1) * $this->pageSize);
     }
 }

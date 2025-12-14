@@ -23,23 +23,41 @@ class ApiResponse
         http_response_code($status);
 
         return json_encode([
-            'status' => 'success',
             'data' => $data,
-            'meta' => $meta,
+            'meta' => array_merge(['status' => $status], $meta),
+            'errors' => [],
         ], JSON_THROW_ON_ERROR);
     }
 
     /**
      * @param array<string, scalar|array|null> $errors
      */
-    public static function error(string $message, int $status = 400, array $errors = []): string
+    public static function error(string $message, int $status = 400, array $errors = [], ?string $code = null): string
     {
         http_response_code($status);
 
         return json_encode([
-            'status' => 'error',
-            'message' => $message,
+            'data' => null,
+            'meta' => [
+                'status' => $status,
+                'message' => $message,
+                'error_code' => $code ?? self::errorCodeForStatus($status),
+            ],
             'errors' => $errors,
         ], JSON_THROW_ON_ERROR);
+    }
+
+    private static function errorCodeForStatus(int $status): string
+    {
+        return match ($status) {
+            400 => 'bad_request',
+            401 => 'unauthorized',
+            403 => 'forbidden',
+            404 => 'not_found',
+            409 => 'conflict',
+            422 => 'validation_failed',
+            429 => 'too_many_requests',
+            default => 'server_error',
+        };
     }
 }

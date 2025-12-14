@@ -59,6 +59,16 @@ Base de backend PHP con arquitectura limpia/hexagonal, estándares PSR y medidas
 - **SSO preparado**: `OidcLoginUseCase` valida `state`, `nonce`, `aud`, `iss`, `exp` y usa `user_identities` para vincular Google/Microsoft.
 - **Multi-empresa**: los tokens incluyen `company_id` (reclamación configurable) y el middleware `ActiveCompanyResolver` valida que el usuario pertenezca a la empresa indicada en el token o en el header `TENANT_HEADER`. El cambio de contexto emite nuevas credenciales mediante `SwitchActiveCompanyUseCase` (rota refresh token) y `PdoRepository::withCompanyScope()` permite filtrar consultas tenant por `company_id`.
 
+## Convenciones de API (v1)
+- **Versionado**: todas las rutas públicas deben colgar de `/api/v1/...`.
+- **Respuesta única**: siempre devolver `{ data, meta, errors }`. En éxito `errors` es `[]` y `meta.status` refleja el código HTTP.
+- **Errores**: `meta.error_code` y `meta.message` acompañan los códigos `400/401/403/404/409/422/429/500`. Usa `ApiResponse::error()`
+  para mantener consistencia y evitar exponer trazas.
+- **Paginación estándar**: `PaginationResult` entrega `data` y `meta` con `page`, `page_size`, `total`, `has_next`.
+- **Filtros y sorting con whitelist**: valida campos de filtro/orden con `RequestValidator::whitelistFilters()` y `whitelistSort()`
+  para evitar inyecciones en consultas.
+- **Validación**: todos los endpoints deben validar entrada antes de invocar casos de uso y responder `422` cuando corresponda.
+
 ## Autorización (RBAC)
 - **Permisos por módulo**: los seeds cargan permisos agrupados (usuarios, roles, proyectos, procurement, timesheets, payroll, soporte) y crean roles por empresa (`Owner`, `Approver`, `Viewer`, `Support`).
 - **Middleware can()**: `AuthorizationMiddleware->can('permission.code')` resuelve el `company_user_id` activo y usa caché en memoria para validar permisos por rol; tokens portan `platform_role` para respetar super administradores.

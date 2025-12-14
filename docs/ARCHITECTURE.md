@@ -25,9 +25,10 @@ Este backend sigue principios de Clean Architecture/Hexagonal, separando respons
 
 - **Nombres**: clases con verbo-sustantivo (`CreateAssignmentUseCase`), repositorios con sufijo `Repository`, controladores con sufijo `Controller`.
 - **Excepciones**: usar `DomainException` para reglas de negocio y `ApplicationException` para errores de caso de uso o infraestructura traducida.
-- **Errores**: los adaptadores HTTP devuelven cuerpos JSON `{status,data|message,errors,meta}`; los códigos HTTP se aplican en `ApiResponse`.
+- **Errores**: los adaptadores HTTP devuelven cuerpos JSON `{ data, meta, errors }`; `meta.status` refleja el código HTTP y `meta.error_code` sigue la convención `bad_request/unauthorized/forbidden/not_found/conflict/validation_failed/too_many_requests/server_error`.
 - **Logging**: usar `App\Infrastructure\Logging\Logger` con canales por módulo (`new Logger('billing')`). Los contextos se serializan a JSON.
-- **Paginación**: `PaginationRequest` define entrada estándar (`page`, `perPage`, `sortBy`, `direction`) y `PaginationResult` entrega `data` + `meta` (`total`, `page`, `per_page`, `pages`).
+- **Paginación**: `PaginationRequest` define entrada estándar (`page`, `pageSize`, `sortBy`, `direction`) y `PaginationResult` entrega `data` + `meta` (`total`, `page`, `page_size`, `has_next`).
+- **Filtros y sorting**: controla campos permitidos con `RequestValidator::whitelistFilters()` y `whitelistSort()` para evitar inyección de columnas.
 - **Soft delete**: cuando la tabla incluye `deleted_at`, aplica el helper `withSoftDeleteScope()` de `PdoRepository` para excluir registros eliminados lógicamente en cada consulta.
 - **Multi-tenant**: toda consulta a datos de compañía debe incluir el helper `withCompanyScope()` usando el `company_id` resuelto por `ActiveCompanyResolver` o derivado del token JWT.
 

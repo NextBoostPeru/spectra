@@ -32,4 +32,37 @@ class RequestValidator
 
         return $validated;
     }
+
+    /**
+     * @param array<string, scalar|null> $filters
+     * @param list<string> $allowed
+     * @return array<string, scalar|null>
+     */
+    public function whitelistFilters(array $filters, array $allowed): array
+    {
+        $sanitized = [];
+
+        foreach ($allowed as $field) {
+            if (array_key_exists($field, $filters)) {
+                $sanitized[$field] = $filters[$field];
+            }
+        }
+
+        return $sanitized;
+    }
+
+    /**
+     * @param list<string> $allowed
+     * @return array{sort_by:string|null,direction:string}
+     */
+    public function whitelistSort(?string $sortBy, ?string $direction, array $allowed): array
+    {
+        $field = $sortBy !== null && in_array($sortBy, $allowed, true) ? $sortBy : ($allowed[0] ?? null);
+        $dir = strtolower($direction ?? 'asc') === 'desc' ? 'desc' : 'asc';
+
+        return [
+            'sort_by' => $field,
+            'direction' => $dir,
+        ];
+    }
 }
