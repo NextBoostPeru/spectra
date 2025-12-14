@@ -89,9 +89,14 @@ Base de backend PHP con arquitectura limpia/hexagonal, estándares PSR y medidas
 - **Assignments**: `AssignmentController` asigna freelancers a proyectos con rol, fechas y estado (`CreateAssignmentUseCase`) y lista asignaciones por proyecto (`ListAssignmentsByProjectUseCase`).
 - **Contratos y firmas**: `ContractController` publica plantillas (`CreateContractTemplateUseCase`), crea contratos multi-empresa desde plantillas (`CreateContractUseCase`), versiona documentos (`AddContractVersionUseCase`), envía a firma con DocuSign (`SendContractForSignatureUseCase`) y permite aprobaciones legales (`ApproveContractUseCase`). El webhook `DocusignWebhookController` valida la firma HMAC con `DOCUSIGN_WEBHOOK_SECRET` y actualiza estados de versiones/firmantes; el job `NotifyExpiringContractsJob` deja trazas y marca avisos sobre contratos próximos a vencer según `CONTRACT_EXPIRATION_WARNING_DAYS`.
 
-## Operación (Onboarding y entregables)
+## Operación (Onboarding, entregables y tiempo)
 - **Onboarding**: checklists multi-empresa con ítems y provisión de accesos. `OnboardingController` permite crear checklists, añadir ítems, asignarlos a empleados/freelancers y marcar ítems completados con evidencia y provisiones de acceso (registro en `onboarding_access_provisions`). El progreso se lista paginado por sujeto.
 - **Entregables y NPS**: `DeliverableController` crea entregables ligados a proyectos/asignaciones, acepta envíos y revisiones con decisiones (`approved/rejected/changes_requested`) y guarda reseñas en `deliverable_reviews`. Las respuestas NPS por proyecto se almacenan en `nps_responses` y exponen permisos dedicados para ver o responder.
+- **Timesheets**: `TimesheetController` registra horas (`CreateTimesheetUseCase`), permite enviar (`SubmitTimesheetUseCase`), aprobar/rechazar (`ApproveTimesheetUseCase` / `RejectTimesheetUseCase`) y bloquear registros aprobados (`LockTimesheetUseCase`). Las consultas paginadas por asignación usan `ListTimesheetsUseCase` y respetan `company_id`.
+
+## Aprobaciones cross-módulo
+- **Motor de políticas**: `ApprovalEngine` evalúa políticas activas por tipo de objeto (`contract`, `requisition`, `payroll_run`) y crea `approval_requests` y `approval_steps` según reglas (`approval_rules`) filtradas por monto/moneda.
+- **Solicitudes de aprobación**: `ApprovalController` expone creación y resolución (`approve`/`reject`) de pasos con `StartApprovalRequestUseCase` y `ResolveApprovalStepUseCase`. Casos de uso específicos (`RequestContractApprovalUseCase`, `RequestRequisitionApprovalUseCase`, `RequestPayrollRunApprovalUseCase`) reutilizan el motor para conectar contratos, requisiciones y corridas de nómina.
 
 ## Flujo de desarrollo recomendado
 1. Implementa casos de uso en `app/Application` y entidades/value objects en `app/Domain`.
