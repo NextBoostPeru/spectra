@@ -49,6 +49,15 @@ Base de backend PHP con arquitectura limpia/hexagonal, estándares PSR y medidas
 - **Validación estricta**: usar `RequestValidator` en controladores para no confiar en la entrada del cliente.
 - **Soft delete**: tablas con columna `deleted_at` deben consultarse usando el alcance `withSoftDeleteScope()` en repositorios PDO.
 
+## Autenticación y sesiones
+- **Password hashing**: `PASSWORD_ARGON2ID` (PHP 8.2+) en `PasswordHasher`.
+- **JWT**: `JwtTokenManager` emite *access tokens* con `iss`, `aud`, `sub` y `sid`; configura `JWT_SECRET`, `JWT_ACCESS_TTL` y `JWT_REFRESH_TTL_DAYS` en `.env`.
+- **Refresh tokens**: valores opacos de 128 caracteres, almacenados como `sha256` en `user_sessions` y rotados en cada `refresh`.
+- **Lockout**: `LoginAttemptLimiter` bloquea temporalmente tras `AUTH_MAX_ATTEMPTS` fallidos en ventanas de `AUTH_ATTEMPT_WINDOW`; persistencia en `storage/cache/login-locks`.
+- **Rate limiting**: `AuthController` protege `login` por IP usando la política de `config/security.php`.
+- **Logout y revocación**: `LogoutUserUseCase` marca la sesión como `revoked` por hash de refresh token.
+- **SSO preparado**: `OidcLoginUseCase` valida `state`, `nonce`, `aud`, `iss`, `exp` y usa `user_identities` para vincular Google/Microsoft.
+
 ## Flujo de desarrollo recomendado
 1. Implementa casos de uso en `app/Application` y entidades/value objects en `app/Domain`.
 2. Añade adaptadores de infraestructura (repositorios, mailer, storage) bajo `app/Infrastructure`.
