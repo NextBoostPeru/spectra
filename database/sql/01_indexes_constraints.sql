@@ -952,6 +952,89 @@ ALTER TABLE `wallets`
 ALTER TABLE `wallet_transactions`
   ADD CONSTRAINT `fk_wallet_tx_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`),
   ADD CONSTRAINT `fk_wallet_tx_currency` FOREIGN KEY (`currency_id`) REFERENCES `currencies` (`id`);
+
+--
+-- Indices para la tabla `onboarding_checklists`
+--
+ALTER TABLE `onboarding_checklists`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_onboarding_checklists_company` (`company_id`),
+  ADD CONSTRAINT `fk_onboarding_checklists_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`);
+
+--
+-- Indices para la tabla `onboarding_items`
+--
+ALTER TABLE `onboarding_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_onboarding_items_checklist` (`checklist_id`),
+  ADD CONSTRAINT `fk_onboarding_items_checklist` FOREIGN KEY (`checklist_id`) REFERENCES `onboarding_checklists` (`id`);
+
+--
+-- Indices para la tabla `onboarding_assignments`
+--
+ALTER TABLE `onboarding_assignments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_onboarding_assignments_company` (`company_id`),
+  ADD KEY `idx_onboarding_assignments_checklist` (`checklist_id`),
+  ADD KEY `idx_onboarding_assignments_subject` (`subject_id`),
+  ADD CONSTRAINT `fk_onboarding_assignments_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`),
+  ADD CONSTRAINT `fk_onboarding_assignments_checklist` FOREIGN KEY (`checklist_id`) REFERENCES `onboarding_checklists` (`id`);
+
+--
+-- Indices para la tabla `onboarding_assignment_items`
+--
+ALTER TABLE `onboarding_assignment_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_onboarding_assignment_items_assignment` (`assignment_id`),
+  ADD KEY `idx_onboarding_assignment_items_item` (`item_id`),
+  ADD KEY `idx_onboarding_assignment_items_assignee` (`assignee_company_user_id`),
+  ADD CONSTRAINT `fk_onboarding_assignment_items_assignment` FOREIGN KEY (`assignment_id`) REFERENCES `onboarding_assignments` (`id`),
+  ADD CONSTRAINT `fk_onboarding_assignment_items_item` FOREIGN KEY (`item_id`) REFERENCES `onboarding_items` (`id`),
+  ADD CONSTRAINT `fk_onboarding_assignment_items_assignee` FOREIGN KEY (`assignee_company_user_id`) REFERENCES `company_users` (`id`);
+
+--
+-- Indices para la tabla `onboarding_access_provisions`
+--
+ALTER TABLE `onboarding_access_provisions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_onboarding_access_assignment_item` (`assignment_item_id`),
+  ADD KEY `idx_onboarding_access_granted_by` (`granted_by_company_user_id`),
+  ADD CONSTRAINT `fk_onboarding_access_assignment_item` FOREIGN KEY (`assignment_item_id`) REFERENCES `onboarding_assignment_items` (`id`),
+  ADD CONSTRAINT `fk_onboarding_access_granted_by` FOREIGN KEY (`granted_by_company_user_id`) REFERENCES `company_users` (`id`);
+
+--
+-- Indices para la tabla `deliverables`
+--
+ALTER TABLE `deliverables`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_deliverables_company` (`company_id`),
+  ADD KEY `idx_deliverables_project` (`project_id`),
+  ADD KEY `idx_deliverables_assignment` (`assignment_id`),
+  ADD CONSTRAINT `fk_deliverables_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`),
+  ADD CONSTRAINT `fk_deliverables_project` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`),
+  ADD CONSTRAINT `fk_deliverables_assignment` FOREIGN KEY (`assignment_id`) REFERENCES `assignments` (`id`);
+
+--
+-- Indices para la tabla `deliverable_reviews`
+--
+ALTER TABLE `deliverable_reviews`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_deliverable_reviews_deliverable` (`deliverable_id`),
+  ADD KEY `idx_deliverable_reviews_reviewer` (`reviewer_company_user_id`),
+  ADD CONSTRAINT `fk_deliverable_reviews_deliverable` FOREIGN KEY (`deliverable_id`) REFERENCES `deliverables` (`id`),
+  ADD CONSTRAINT `fk_deliverable_reviews_reviewer` FOREIGN KEY (`reviewer_company_user_id`) REFERENCES `company_users` (`id`);
+
+--
+-- Indices para la tabla `nps_responses`
+--
+ALTER TABLE `nps_responses`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_nps_responses_company` (`company_id`),
+  ADD KEY `idx_nps_responses_project` (`project_id`),
+  ADD KEY `idx_nps_responses_user` (`respondent_company_user_id`),
+  ADD CONSTRAINT `fk_nps_responses_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`),
+  ADD CONSTRAINT `fk_nps_responses_project` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`),
+  ADD CONSTRAINT `fk_nps_responses_user` FOREIGN KEY (`respondent_company_user_id`) REFERENCES `company_users` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -62,6 +62,14 @@ final class ReferenceDataSeeder extends AbstractSeed
                 ['code' => 'contracts.sign', 'description' => 'Firmar contratos asignados', 'scope' => 'company'],
                 ['code' => 'contracts.approve_legal', 'description' => 'Aprobar legalmente contratos', 'scope' => 'company'],
             ],
+            'operations' => [
+                ['code' => 'onboarding.manage', 'description' => 'Administrar checklists e ítems de onboarding', 'scope' => 'company'],
+                ['code' => 'onboarding.view', 'description' => 'Consultar progreso de onboarding', 'scope' => 'company'],
+                ['code' => 'deliverables.manage', 'description' => 'Crear y actualizar entregables', 'scope' => 'company'],
+                ['code' => 'deliverables.review', 'description' => 'Revisar y aprobar entregables', 'scope' => 'company'],
+                ['code' => 'nps.view', 'description' => 'Ver respuestas NPS de proyectos', 'scope' => 'company'],
+                ['code' => 'nps.respond', 'description' => 'Responder NPS en proyectos asignados', 'scope' => 'company'],
+            ],
         ];
 
         $permissions = [];
@@ -111,6 +119,10 @@ final class ReferenceDataSeeder extends AbstractSeed
                         'purchase_orders.manage',
                         'timesheets.approve',
                         'contracts.approve_legal',
+                        'onboarding.manage',
+                        'deliverables.manage',
+                        'deliverables.review',
+                        'nps.view',
                     ],
                 ],
                 'viewer' => [
@@ -121,6 +133,9 @@ final class ReferenceDataSeeder extends AbstractSeed
                         'support.view',
                         'timesheets.review',
                         'contracts.view',
+                        'onboarding.view',
+                        'deliverables.review',
+                        'nps.view',
                     ],
                 ],
                 'support' => [

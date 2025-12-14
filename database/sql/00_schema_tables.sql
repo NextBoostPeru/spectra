@@ -1087,4 +1087,147 @@ CREATE TABLE `wallet_transactions` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `onboarding_checklists`
+--
+
+CREATE TABLE `onboarding_checklists` (
+  `id` char(36) NOT NULL,
+  `company_id` char(36) NOT NULL,
+  `name` varchar(160) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `category` varchar(80) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `onboarding_items`
+--
+
+CREATE TABLE `onboarding_items` (
+  `id` char(36) NOT NULL,
+  `checklist_id` char(36) NOT NULL,
+  `title` varchar(200) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `sort_order` int(10) UNSIGNED NOT NULL DEFAULT 1,
+  `is_required` tinyint(1) NOT NULL DEFAULT 1,
+  `is_access_provision` tinyint(1) NOT NULL DEFAULT 0,
+  `system_name` varchar(120) DEFAULT NULL,
+  `resource` varchar(120) DEFAULT NULL,
+  `due_days` int(10) UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `onboarding_assignments`
+--
+
+CREATE TABLE `onboarding_assignments` (
+  `id` char(36) NOT NULL,
+  `company_id` char(36) NOT NULL,
+  `checklist_id` char(36) NOT NULL,
+  `subject_type` enum('employee','freelancer') NOT NULL,
+  `subject_id` char(36) NOT NULL,
+  `status` enum('pending','in_progress','completed','blocked') NOT NULL DEFAULT 'pending',
+  `started_at` timestamp NULL DEFAULT NULL,
+  `completed_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `onboarding_assignment_items`
+--
+
+CREATE TABLE `onboarding_assignment_items` (
+  `id` char(36) NOT NULL,
+  `assignment_id` char(36) NOT NULL,
+  `item_id` char(36) NOT NULL,
+  `status` enum('pending','in_progress','completed','skipped') NOT NULL DEFAULT 'pending',
+  `assignee_company_user_id` char(36) DEFAULT NULL,
+  `due_date` date DEFAULT NULL,
+  `completed_at` timestamp NULL DEFAULT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  `evidence_url` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `onboarding_access_provisions`
+--
+
+CREATE TABLE `onboarding_access_provisions` (
+  `id` char(36) NOT NULL,
+  `assignment_item_id` char(36) NOT NULL,
+  `system_name` varchar(150) NOT NULL,
+  `resource` varchar(150) DEFAULT NULL,
+  `access_level` varchar(80) DEFAULT NULL,
+  `account_identifier` varchar(150) DEFAULT NULL,
+  `granted_by_company_user_id` char(36) DEFAULT NULL,
+  `granted_at` timestamp NULL DEFAULT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `deliverables`
+--
+
+CREATE TABLE `deliverables` (
+  `id` char(36) NOT NULL,
+  `company_id` char(36) NOT NULL,
+  `project_id` char(36) NOT NULL,
+  `assignment_id` char(36) DEFAULT NULL,
+  `title` varchar(200) NOT NULL,
+  `description` text DEFAULT NULL,
+  `status` enum('pending','submitted','in_review','accepted','rejected') NOT NULL DEFAULT 'pending',
+  `due_date` date DEFAULT NULL,
+  `submitted_at` timestamp NULL DEFAULT NULL,
+  `reviewed_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `deliverable_reviews`
+--
+
+CREATE TABLE `deliverable_reviews` (
+  `id` char(36) NOT NULL,
+  `deliverable_id` char(36) NOT NULL,
+  `reviewer_company_user_id` char(36) NOT NULL,
+  `decision` enum('approved','rejected','changes_requested') NOT NULL,
+  `score` int(11) DEFAULT NULL,
+  `comments` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `nps_responses`
+--
+
+CREATE TABLE `nps_responses` (
+  `id` char(36) NOT NULL,
+  `company_id` char(36) NOT NULL,
+  `project_id` char(36) NOT NULL,
+  `respondent_company_user_id` char(36) NOT NULL,
+  `score` tinyint(3) NOT NULL,
+  `comment` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 --

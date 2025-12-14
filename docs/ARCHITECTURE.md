@@ -44,3 +44,8 @@ Este backend sigue principios de Clean Architecture/Hexagonal, separando respons
 - Mantener los Value Objects inmutables y comparar con `equals()`.
 - Las respuestas HTTP deben usar `ApiResponse::success()` o `ApiResponse::error()` para uniformidad.
 - Registrar eventos relevantes vía `Logger` y complementar con auditorías en Infraestructura.
+
+## Módulos de operación
+
+- **Onboarding**: checklists e ítems viven en `onboarding_checklists` y `onboarding_items`; las asignaciones a empleados/freelancers quedan en `onboarding_assignments` con progreso por ítem en `onboarding_assignment_items`. Si un ítem requiere acceso, el alta se traza en `onboarding_access_provisions` para auditar quién otorgó el acceso y a qué recurso.
+- **Entregables**: los entregables por proyecto/asignación se persisten en `deliverables` con reseñas en `deliverable_reviews`. Las respuestas de satisfacción (NPS 0–10) van a `nps_responses` y dependen de permisos `deliverables.*` y `nps.*` sembrados por `ReferenceDataSeeder`.
