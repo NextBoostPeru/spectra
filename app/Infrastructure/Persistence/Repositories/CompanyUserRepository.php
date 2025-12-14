@@ -83,6 +83,42 @@ class CompanyUserRepository extends PdoRepository implements CompanyUserReposito
         });
     }
 
+    public function createMembership(string $companyId, string $userId, string $status = 'active', bool $isActive = false): CompanyUser
+    {
+        return $this->guard(function () use ($companyId, $userId, $status, $isActive) {
+            $id = $this->uuid();
+            $statement = $this->connection->prepare(<<<'SQL'
+INSERT INTO company_users (id, company_id, user_id, status, active_company)
+VALUES (:id, :company_id, :user_id, :status, :active_company)
+SQL);
+
+            $statement->bindValue(':id', $id);
+            $statement->bindValue(':company_id', $companyId);
+            $statement->bindValue(':user_id', $userId);
+            $statement->bindValue(':status', $status);
+            $statement->bindValue(':active_company', $isActive ? 1 : 0);
+            $statement->execute();
+
+            if ($isActive) {
+                $this->setActiveCompany($userId, $companyId);
+            }
+
+            return $this->assertMembership($userId, $companyId);
+        });
+    }
+
+    public function listForCompany(string $companyId): array
+    {
+        return $this->guard(function () use ($companyId) {
+            $query = $this->withSoftDeleteScope('SELECT id, company_id, user_id, status, active_company, deleted_at FROM company_users WHERE company_id = :company_id');
+            $statement = $this->connection->prepare($query);
+            $statement->bindValue(':company_id', $companyId);
+            $statement->execute();
+
+            return array_map(fn (array $row): CompanyUser => $this->hydrate($row), $statement->fetchAll());
+        });
+    }
+
     /**
      * @param array<string, mixed> $row
      */
@@ -101,6 +137,21 @@ class CompanyUserRepository extends PdoRepository implements CompanyUserReposito
             status: (string) $row['status'],
             isActive: (bool) $row['active_company'],
             deletedAt: $deletedAt,
+        );
+    }
+
+    private function uuid(): string
+    {
+        return sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            random_int(0, 0xffff),
+            random_int(0, 0xffff),
+            random_int(0, 0xffff),
+            random_int(0, 0x0fff) | 0x4000,
+            random_int(0, 0x3fff) | 0x8000,
+            random_int(0, 0xffff),
+            random_int(0, 0xffff),
+            random_int(0, 0xffff),
         );
     }
 }

@@ -75,6 +75,11 @@ Base de backend PHP con arquitectura limpia/hexagonal, estándares PSR y medidas
 - **Política de proyectos**: `ProjectPolicy::canView()` permite leer proyectos solo si el usuario tiene `projects.view_all`/`projects.manage` o está en `project_members`.
 - **Repositorios de control de acceso**: `PermissionRepository` obtiene permisos efectivos por `company_user_id`; `ProjectMemberRepository` verifica membresías en proyectos.
 
+## Core (Fase 1)
+- **Companies**: CRUD básico con ajustes fiscales/idioma en `CompanyController` (`store`, `update`, `destroy`, `updateSettings`) y contactos (`addContact`, `removeContact`), respaldado por `CompanyRepository`, `CompanySettingsRepository` y `CompanyContactRepository`.
+- **Usuarios y roles**: `UserController` permite crear usuarios con membresía activa en empresa (`CreateUserUseCase`), listar miembros (`ListCompanyUsersUseCase`), sincronizar roles (`SyncUserRolesUseCase`) y crear roles por empresa (`CreateRoleUseCase`). Los repositorios `RoleRepository` y `UserRoleRepository` gestionan catálogos y asignaciones.
+- **Auditoría global**: `AuditLoggerMiddleware` persiste en `audit_logs` cada solicitud procesada (actor, company, acción, IP, user-agent) con saneamiento de metadatos sensibles.
+
 ## Flujo de desarrollo recomendado
 1. Implementa casos de uso en `app/Application` y entidades/value objects en `app/Domain`.
 2. Añade adaptadores de infraestructura (repositorios, mailer, storage) bajo `app/Infrastructure`.

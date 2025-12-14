@@ -56,6 +56,36 @@ class UserRepository extends PdoRepository implements UserRepositoryInterface
         });
     }
 
+    public function create(string $email, string $passwordHash, string $platformRole = 'user', string $status = 'active'): User
+    {
+        return $this->guard(function () use ($email, $passwordHash, $platformRole, $status) {
+            $id = $this->uuid();
+            $statement = $this->connection->prepare(<<<'SQL'
+INSERT INTO users (id, email, password_hash, status, platform_role)
+VALUES (:id, :email, :password_hash, :status, :platform_role)
+SQL);
+
+            $statement->bindValue(':id', $id);
+            $statement->bindValue(':email', strtolower($email));
+            $statement->bindValue(':password_hash', $passwordHash);
+            $statement->bindValue(':status', $status);
+            $statement->bindValue(':platform_role', $platformRole);
+            $statement->execute();
+
+            return $this->findById($id);
+        });
+    }
+
+    public function updateStatus(string $userId, string $status): void
+    {
+        $this->guard(function () use ($userId, $status) {
+            $statement = $this->connection->prepare('UPDATE users SET status = :status WHERE id = :id');
+            $statement->bindValue(':status', $status);
+            $statement->bindValue(':id', $userId);
+            $statement->execute();
+        });
+    }
+
     /**
      * @param array<string, mixed> $row
      */
@@ -74,6 +104,21 @@ class UserRepository extends PdoRepository implements UserRepositoryInterface
             status: (string) $row['status'],
             platformRole: (string) $row['platform_role'],
             deletedAt: $deletedAt,
+        );
+    }
+
+    private function uuid(): string
+    {
+        return sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            random_int(0, 0xffff),
+            random_int(0, 0xffff),
+            random_int(0, 0xffff),
+            random_int(0, 0x0fff) | 0x4000,
+            random_int(0, 0x3fff) | 0x8000,
+            random_int(0, 0xffff),
+            random_int(0, 0xffff),
+            random_int(0, 0xffff),
         );
     }
 }

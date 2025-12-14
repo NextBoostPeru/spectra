@@ -38,6 +38,11 @@ class CompanyUser
         return $this->isActive;
     }
 
+    public function status(): string
+    {
+        return $this->status;
+    }
+
     public function assertUsable(): void
     {
         if ($this->deletedAt !== null) {

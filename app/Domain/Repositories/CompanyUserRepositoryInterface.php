@@ -13,4 +13,11 @@ interface CompanyUserRepositoryInterface
     public function assertMembership(string $userId, string $companyId): CompanyUser;
 
     public function setActiveCompany(string $userId, string $companyId): CompanyUser;
+
+    public function createMembership(string $companyId, string $userId, string $status = 'active', bool $isActive = false): CompanyUser;
+
+    /**
+     * @return list<CompanyUser>
+     */
+    public function listForCompany(string $companyId): array;
 }
