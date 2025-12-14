@@ -28,6 +28,7 @@ Este backend sigue principios de Clean Architecture/Hexagonal, separando respons
 - **Errores**: los adaptadores HTTP devuelven cuerpos JSON `{status,data|message,errors,meta}`; los códigos HTTP se aplican en `ApiResponse`.
 - **Logging**: usar `App\Infrastructure\Logging\Logger` con canales por módulo (`new Logger('billing')`). Los contextos se serializan a JSON.
 - **Paginación**: `PaginationRequest` define entrada estándar (`page`, `perPage`, `sortBy`, `direction`) y `PaginationResult` entrega `data` + `meta` (`total`, `page`, `per_page`, `pages`).
+- **Soft delete**: cuando la tabla incluye `deleted_at`, aplica el helper `withSoftDeleteScope()` de `PdoRepository` para excluir registros eliminados lógicamente en cada consulta.
 
 ## Flujo de dependencias
 
