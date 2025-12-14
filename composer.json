@@ -1,0 +1,33 @@
+{
+    "name": "spectra/backend",
+    "description": "Base backend setup with PSR-12 tooling",
+    "type": "project",
+    "require": {
+        "php": "^8.1",
+        "vlucas/phpdotenv": "^5.6"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.64",
+        "phpstan/phpstan": "^1.11"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "format": "php-cs-fixer fix --config=.php-cs-fixer.dist.php",
+        "lint": "php -l",
+        "phpstan": "phpstan analyse",
+        "test": [
+            "@phpstan"
+        ]
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

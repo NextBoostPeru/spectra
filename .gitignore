@@ -1,0 +1,14 @@
+/vendor/
+/.env
+/.env.local
+/storage/*
+!/storage/.gitkeep
+/storage/cache/*
+!/storage/cache/.gitkeep
+/storage/logs/
+/cache/
+/tmp/
+/node_modules/
+/.php-cs-fixer.cache
+/public/uploads/tmp/
+/public/uploads/cache/
