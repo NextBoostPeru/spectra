@@ -33,7 +33,7 @@ El API valida que la tabla exista, infiere columnas y llave primaria desde `info
 - El endpoint actualiza `last_login_at` del usuario y responde 401 cuando las credenciales no son válidas.
 
 ### Frontend de ejemplo
-Se incluye `frontend/login.html` con React 18 y Tailwind vía CDN para consumir el login desde un origen separado.
+Se incluye `frontend/login.html`, construido con React 18 y Tailwind vía CDN. Usa el color principal `#006d71` y permite indicar la URL completa del endpoint `/api/login` para que funcione aun cuando el frontend y backend estén en orígenes distintos.
 
 1. Levanta el backend PHP (por ejemplo `php -S localhost:8000 -t public`).
-2. Abre el archivo HTML en tu navegador (servido por otro origen o como archivo local) y apunta `API_URL` al backend.
+2. Abre el archivo HTML en tu navegador (servido por otro origen o como archivo local), escribe la URL de la API en el campo **URL de la API** y realiza el inicio de sesión.

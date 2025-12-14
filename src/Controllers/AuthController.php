@@ -31,7 +31,9 @@ class AuthController
             return;
         }
 
-        $stmt = $this->pdo->prepare('SELECT id, full_name, email, password_hash, status, platform_role FROM users WHERE email = :email LIMIT 1');
+        $stmt = $this->pdo->prepare(
+            'SELECT id, full_name, email, password_hash, status, platform_role FROM users WHERE email = :email LIMIT 1'
+        );
         $stmt->bindValue(':email', $email);
         $stmt->execute();
         $user = $stmt->fetch();
