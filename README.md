@@ -17,6 +17,10 @@ Puedes iniciar el servidor embebido de PHP apuntando al directorio `public`:
 php -S localhost:8000 -t public
 ```
 
+### Enrutamiento del API
+- No existe una carpeta física `/api`; todas las rutas pasan por `public/index.php` y desde ahí se despachan a los controladores.
+- El repositorio incluye `public/.htaccess` con las reglas de reescritura necesarias para Apache. Si usas Nginx u otro servidor, configura un rewrite para que cualquier ruta inexistente bajo `/api/*` termine en `public/index.php`.
+
 ## Uso del API
 Las rutas siguen el patrón `/api/{tabla}`:
 
