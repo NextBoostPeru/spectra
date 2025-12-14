@@ -61,6 +61,7 @@ class SwitchActiveCompanyUseCase implements UseCase
         }
         $accessToken = $this->jwt->createAccessToken($userId, $session->id(), [
             'company_id' => $membership->companyId(),
+            'platform_role' => $user->platformRole(),
         ]);
 
         return [

@@ -78,6 +78,7 @@ class LoginUserUseCase implements UseCase
         $session = $this->sessions->create($user->id(), $refreshHash, $ip, $userAgent);
         $accessToken = $this->jwt->createAccessToken($user->id(), $session->id(), [
             'company_id' => $activeCompany->companyId(),
+            'platform_role' => $user->platformRole(),
         ]);
 
         $this->users->recordLogin($user->id(), $ip, $userAgent);

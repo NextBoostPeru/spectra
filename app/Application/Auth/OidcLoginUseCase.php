@@ -86,6 +86,7 @@ class OidcLoginUseCase implements UseCase
         $accessToken = $this->jwt->createAccessToken($user->id(), $session->id(), [
             'idp' => $provider,
             'company_id' => $activeCompany->companyId(),
+            'platform_role' => $user->platformRole(),
         ]);
 
         $this->identities->linkIdentity($user->id(), $provider, $subject, (bool) ($claims['email_verified'] ?? false));

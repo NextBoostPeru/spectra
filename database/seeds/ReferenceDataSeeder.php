@@ -23,15 +23,48 @@ final class ReferenceDataSeeder extends AbstractSeed
             ['id' => 170, 'code' => 'COP', 'name' => 'Colombian Peso', 'symbol' => '$'],
         ], ['name', 'symbol']);
 
-        $permissions = [
-            ['code' => 'platform.admin', 'description' => 'Administrar la plataforma completa', 'scope' => 'platform'],
-            ['code' => 'users.manage', 'description' => 'Gestionar usuarios y accesos', 'scope' => 'company'],
-            ['code' => 'roles.manage', 'description' => 'Administrar roles y permisos', 'scope' => 'company'],
-            ['code' => 'projects.manage', 'description' => 'Administrar proyectos y asignaciones', 'scope' => 'company'],
-            ['code' => 'purchases.manage', 'description' => 'Gestionar requisiciones y órdenes de compra', 'scope' => 'company'],
-            ['code' => 'payroll.run', 'description' => 'Ejecutar nómina y pagos', 'scope' => 'company'],
-            ['code' => 'support.manage', 'description' => 'Atender tickets de soporte', 'scope' => 'company'],
+        $permissionGroups = [
+            'platform' => [
+                ['code' => 'platform.admin', 'description' => 'Administrar la plataforma completa', 'scope' => 'platform'],
+            ],
+            'users' => [
+                ['code' => 'users.view', 'description' => 'Ver usuarios de la empresa', 'scope' => 'company'],
+                ['code' => 'users.manage', 'description' => 'Gestionar usuarios y accesos', 'scope' => 'company'],
+                ['code' => 'roles.manage', 'description' => 'Administrar roles y permisos', 'scope' => 'company'],
+            ],
+            'projects' => [
+                ['code' => 'projects.view_all', 'description' => 'Ver todos los proyectos de la empresa', 'scope' => 'company'],
+                ['code' => 'projects.manage', 'description' => 'Administrar proyectos y asignaciones', 'scope' => 'company'],
+                ['code' => 'projects.assign_members', 'description' => 'Asignar miembros a proyectos', 'scope' => 'company'],
+            ],
+            'procurement' => [
+                ['code' => 'requisitions.submit', 'description' => 'Crear y enviar requisiciones', 'scope' => 'company'],
+                ['code' => 'requisitions.approve', 'description' => 'Aprobar o rechazar requisiciones', 'scope' => 'company'],
+                ['code' => 'requisitions.view', 'description' => 'Ver requisiciones de la empresa', 'scope' => 'company'],
+                ['code' => 'purchase_orders.manage', 'description' => 'Gestionar órdenes de compra', 'scope' => 'company'],
+                ['code' => 'vendors.manage', 'description' => 'Administrar proveedores', 'scope' => 'company'],
+            ],
+            'timesheets' => [
+                ['code' => 'timesheets.review', 'description' => 'Revisar partes de tiempo', 'scope' => 'company'],
+                ['code' => 'timesheets.approve', 'description' => 'Aprobar partes de tiempo', 'scope' => 'company'],
+            ],
+            'payroll' => [
+                ['code' => 'payroll.run', 'description' => 'Ejecutar nómina y pagos', 'scope' => 'company'],
+                ['code' => 'payroll.view_reports', 'description' => 'Ver reportes y pólizas de nómina', 'scope' => 'company'],
+            ],
+            'support' => [
+                ['code' => 'support.view', 'description' => 'Consultar tickets de soporte', 'scope' => 'company'],
+                ['code' => 'support.manage', 'description' => 'Atender tickets de soporte', 'scope' => 'company'],
+            ],
         ];
+
+        $permissions = [];
+
+        foreach ($permissionGroups as $group => $items) {
+            foreach ($items as $permission) {
+                $permissions[] = $permission;
+            }
+        }
 
         $permissionIds = [];
         foreach ($permissions as $permission) {
@@ -51,30 +84,36 @@ final class ReferenceDataSeeder extends AbstractSeed
             return;
         }
 
+        $allCompanyPermissions = array_values(array_filter(
+            array_column($permissions, 'code'),
+            static fn (string $code): bool => str_starts_with($code, 'platform.') === false
+        ));
+
         foreach ($companies as $company) {
             $companyId = $company['id'];
             $roleTemplates = [
                 'owner' => [
                     'name' => 'Owner',
-                    'permissions' => [
-                        'platform.admin',
-                        'users.manage',
-                        'roles.manage',
-                        'projects.manage',
-                        'purchases.manage',
-                        'payroll.run',
-                    ],
+                    'permissions' => $allCompanyPermissions,
                 ],
                 'approver' => [
                     'name' => 'Approver',
                     'permissions' => [
                         'projects.manage',
-                        'purchases.manage',
+                        'projects.assign_members',
+                        'requisitions.approve',
+                        'purchase_orders.manage',
+                        'timesheets.approve',
                     ],
                 ],
                 'viewer' => [
                     'name' => 'Viewer',
-                    'permissions' => ['projects.manage'],
+                    'permissions' => [
+                        'projects.view_all',
+                        'requisitions.view',
+                        'support.view',
+                        'timesheets.review',
+                    ],
                 ],
                 'support' => [
                     'name' => 'Support',

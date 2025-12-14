@@ -77,6 +77,7 @@ class RefreshTokenUseCase implements UseCase
         $updatedSession = $this->sessions->rotateToken($session->id(), $newRefreshHash, $ip, $userAgent);
         $accessToken = $this->jwt->createAccessToken($updatedSession->userId(), $updatedSession->id(), [
             'company_id' => $activeCompany->companyId(),
+            'platform_role' => $user->platformRole(),
         ]);
 
         return [

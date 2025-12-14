@@ -59,6 +59,12 @@ Base de backend PHP con arquitectura limpia/hexagonal, estándares PSR y medidas
 - **SSO preparado**: `OidcLoginUseCase` valida `state`, `nonce`, `aud`, `iss`, `exp` y usa `user_identities` para vincular Google/Microsoft.
 - **Multi-empresa**: los tokens incluyen `company_id` (reclamación configurable) y el middleware `ActiveCompanyResolver` valida que el usuario pertenezca a la empresa indicada en el token o en el header `TENANT_HEADER`. El cambio de contexto emite nuevas credenciales mediante `SwitchActiveCompanyUseCase` (rota refresh token) y `PdoRepository::withCompanyScope()` permite filtrar consultas tenant por `company_id`.
 
+## Autorización (RBAC)
+- **Permisos por módulo**: los seeds cargan permisos agrupados (usuarios, roles, proyectos, procurement, timesheets, payroll, soporte) y crean roles por empresa (`Owner`, `Approver`, `Viewer`, `Support`).
+- **Middleware can()**: `AuthorizationMiddleware->can('permission.code')` resuelve el `company_user_id` activo y usa caché en memoria para validar permisos por rol; tokens portan `platform_role` para respetar super administradores.
+- **Política de proyectos**: `ProjectPolicy::canView()` permite leer proyectos solo si el usuario tiene `projects.view_all`/`projects.manage` o está en `project_members`.
+- **Repositorios de control de acceso**: `PermissionRepository` obtiene permisos efectivos por `company_user_id`; `ProjectMemberRepository` verifica membresías en proyectos.
+
 ## Flujo de desarrollo recomendado
 1. Implementa casos de uso en `app/Application` y entidades/value objects en `app/Domain`.
 2. Añade adaptadores de infraestructura (repositorios, mailer, storage) bajo `app/Infrastructure`.

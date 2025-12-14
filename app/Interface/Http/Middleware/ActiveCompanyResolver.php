@@ -19,7 +19,7 @@ class ActiveCompanyResolver
 
     /**
      * @param array<string, mixed> $request
-     * @return array{user_id:string,session_id:string,company_id:string,claims:array<string,mixed>}
+     * @return array{user_id:string,company_user_id:string,session_id:string,company_id:string,claims:array<string,mixed>}
      */
     public function resolve(array $request): array
     {
@@ -53,6 +53,7 @@ class ActiveCompanyResolver
 
         return [
             'user_id' => $userId,
+            'company_user_id' => $membership->id(),
             'session_id' => $sessionId,
             'company_id' => $membership->companyId(),
             'claims' => $claims,

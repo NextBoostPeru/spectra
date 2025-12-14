@@ -33,6 +33,11 @@ class User
         return $this->passwordHash;
     }
 
+    public function platformRole(): string
+    {
+        return $this->platformRole;
+    }
+
     public function assertCanLogin(): void
     {
         if ($this->deletedAt !== null) {
