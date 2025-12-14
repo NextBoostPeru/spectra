@@ -4,9 +4,11 @@ require_once __DIR__ . '/../src/Support/Response.php';
 require_once __DIR__ . '/../src/Database.php';
 require_once __DIR__ . '/../src/Controllers/GenericController.php';
 require_once __DIR__ . '/../src/Controllers/AuthController.php';
+require_once __DIR__ . '/../src/Controllers/TenantController.php';
 
 use App\Controllers\GenericController;
 use App\Controllers\AuthController;
+use App\Controllers\TenantController;
 use App\Database;
 use App\Support\Response;
 
@@ -15,6 +17,7 @@ $config = require __DIR__ . '/../config/config.php';
 $database = new Database($config['db']);
 $controller = new GenericController($database, $config['pagination']);
 $authController = new AuthController($database);
+$tenantController = new TenantController($database);
 
 // Refined CORS: always echo the requesting origin (when provided) so dev hosts like
 // http://localhost:5173 can call the remote API without hitting redirect-based preflight errors.
@@ -70,6 +73,11 @@ if ($table === 'register') {
     }
 
     $authController->registerAdmin();
+    return;
+}
+
+if ($table === 'tenants') {
+    $tenantController->handle($segments, $_SERVER['REQUEST_METHOD']);
     return;
 }
 

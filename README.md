@@ -40,6 +40,15 @@ El API valida que la tabla exista, infiere columnas y llave primaria desde `info
 - `POST /api/register` con cuerpo `{ "full_name": "Nombre", "email": "correo", "password": "secreto" }` crea un usuario activo con rol `super_admin`.
 - Pensado solo para el arranque inicial; elimina o deshabilita la ruta cuando ya cuentes con cuentas reales.
 
+### Gestión de empresas (tenants)
+- `GET /api/tenants` lista empresas con su idioma, zona horaria, moneda base, balance de wallet y contadores de facturas, nómina, proyectos y contratos.
+- `POST /api/tenants` crea una empresa con configuración base, ciclo de pago y reglas de fees opcionales. El payload admite contactos iniciales.
+- `GET /api/tenants/{id}` devuelve el detalle, contactos, wallet, últimas facturas, nóminas, proyectos, contratos y ciclo de pago activo.
+- `PUT /api/tenants/{id}` actualiza razón social, país, moneda, idioma, zona horaria y reglas de fees.
+- `POST /api/tenants/{id}/status` activa o suspende con un motivo (queda auditado en `audit_logs`).
+- `POST /api/tenants/{id}/contacts` crea contactos de billing/operaciones/legal; `PUT /api/tenants/{id}/contacts/{contactId}` permite editarlos.
+- `POST /api/tenants/{id}/impersonate` genera un token temporal de soporte (1h) y registra el evento en `audit_logs`.
+
 ## Frontend en React
 Hay dos opciones disponibles en la carpeta `frontend/`:
 
