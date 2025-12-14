@@ -24,11 +24,12 @@ export default function RegisterPage({ apiUrl }) {
     try {
       const response = await fetch(`${apiUrl}/api/register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ full_name: fullName, email, password }),
+        body: new URLSearchParams({ full_name: fullName, email, password }),
       });
 
-      const payload = await response.json();
+      const payload = await response
+        .json()
+        .catch(() => ({ message: 'Respuesta inesperada del servidor' }));
       if (!response.ok) {
         throw new Error(payload?.error || payload?.message || 'No se pudo registrar');
       }

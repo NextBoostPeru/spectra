@@ -22,11 +22,12 @@ export default function LoginPage({ onLogin, apiUrl, existingSession }) {
     try {
       const response = await fetch(`${apiUrl}/api/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: new URLSearchParams({ email, password }),
       });
 
-      const payload = await response.json();
+      const payload = await response
+        .json()
+        .catch(() => ({ message: 'Respuesta inesperada del servidor' }));
       if (!response.ok) {
         throw new Error(payload?.error || payload?.message || 'No se pudo iniciar sesión');
       }

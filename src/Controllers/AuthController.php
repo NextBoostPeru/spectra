@@ -17,9 +17,9 @@ class AuthController
 
     public function login(): void
     {
-        $payload = $this->readJson();
+        $payload = $this->readPayload();
         if ($payload === null) {
-            Response::error('JSON inválido o ausente', 400);
+            Response::error('JSON/Form inválido o ausente', 400);
             return;
         }
 
@@ -70,9 +70,9 @@ class AuthController
 
     public function registerAdmin(): void
     {
-        $payload = $this->readJson();
+        $payload = $this->readPayload();
         if ($payload === null) {
-            Response::error('JSON inválido o ausente', 400);
+            Response::error('JSON/Form inválido o ausente', 400);
             return;
         }
 
@@ -151,10 +151,25 @@ class AuthController
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 
-    private function readJson(): ?array
+    private function readPayload(): ?array
     {
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
         $input = file_get_contents('php://input');
-        $decoded = json_decode($input, true);
-        return is_array($decoded) ? $decoded : null;
+
+        if (stripos($contentType, 'application/json') === 0) {
+            $decoded = json_decode($input, true);
+            return is_array($decoded) ? $decoded : null;
+        }
+
+        if (stripos($contentType, 'application/x-www-form-urlencoded') === 0) {
+            parse_str($input, $parsed);
+            return $parsed ?: null;
+        }
+
+        if (!empty($_POST)) {
+            return $_POST;
+        }
+
+        return null;
     }
 }
