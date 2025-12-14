@@ -133,14 +133,17 @@ ALTER TABLE `contracts`
   ADD KEY `ix_contracts_project` (`project_id`),
   ADD KEY `fk_contracts_template` (`template_id`),
   ADD KEY `fk_contracts_jurisdiction` (`jurisdiction_country_id`),
-  ADD KEY `fk_contracts_rate_currency` (`rate_currency_id`);
+  ADD KEY `fk_contracts_rate_currency` (`rate_currency_id`),
+  ADD KEY `ix_contracts_current_version` (`current_version_id`),
+  ADD KEY `ix_contracts_counterparty` (`counterparty_email`),
+  ADD KEY `fk_contracts_legal_approver` (`legal_approved_by_company_user_id`);
 
 --
 -- Indices de la tabla `contract_templates`
 --
 ALTER TABLE `contract_templates`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `ix_templates_company` (`company_id`,`status`),
+  ADD KEY `ix_templates_company` (`company_id`,`status`,`version`),
   ADD KEY `ix_templates_country` (`country_id`);
 
 --
@@ -150,7 +153,17 @@ ALTER TABLE `contract_versions`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `uq_contract_versions` (`contract_id`,`version_number`),
   ADD KEY `ix_contract_versions_contract` (`contract_id`),
+  ADD KEY `ix_contract_versions_template` (`template_id`),
+  ADD KEY `ix_contract_versions_envelope` (`docusign_envelope_id`),
   ADD KEY `fk_contract_versions_created_by` (`created_by_company_user_id`);
+
+--
+-- Indices de la tabla `contract_signers`
+--
+ALTER TABLE `contract_signers`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `ix_contract_signers_version` (`contract_version_id`,`status`),
+  ADD KEY `ix_contract_signers_email` (`email`);
 
 --
 -- Indices de la tabla `countries`
@@ -190,7 +203,16 @@ ALTER TABLE `deliverable_reviews`
 ALTER TABLE `docusign_envelopes`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `uq_docusign_envelope_id` (`envelope_id`),
-  ADD KEY `ix_docusign_contract` (`contract_id`);
+  ADD KEY `ix_docusign_contract` (`contract_id`),
+  ADD KEY `ix_docusign_version` (`contract_version_id`);
+
+--
+-- Indices de la tabla `docusign_webhook_events`
+--
+ALTER TABLE `docusign_webhook_events`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `ix_webhooks_envelope` (`envelope_id`),
+  ADD KEY `ix_webhooks_version` (`contract_version_id`);
 
 --
 -- Indices de la tabla `exchange_rates`
@@ -271,6 +293,7 @@ ALTER TABLE `legal_approvals`
   ADD PRIMARY KEY (`id`),
   ADD KEY `ix_legal_approvals_company` (`company_id`,`status`),
   ADD KEY `ix_legal_approvals_contract` (`contract_id`),
+  ADD KEY `ix_legal_approvals_version` (`contract_version_id`),
   ADD KEY `fk_legal_approvals_reviewer` (`reviewed_by_company_user_id`);
 
 --
@@ -633,7 +656,9 @@ ALTER TABLE `contracts`
   ADD CONSTRAINT `fk_contracts_jurisdiction` FOREIGN KEY (`jurisdiction_country_id`) REFERENCES `countries` (`id`),
   ADD CONSTRAINT `fk_contracts_project` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`),
   ADD CONSTRAINT `fk_contracts_rate_currency` FOREIGN KEY (`rate_currency_id`) REFERENCES `currencies` (`id`),
-  ADD CONSTRAINT `fk_contracts_template` FOREIGN KEY (`template_id`) REFERENCES `contract_templates` (`id`);
+  ADD CONSTRAINT `fk_contracts_template` FOREIGN KEY (`template_id`) REFERENCES `contract_templates` (`id`),
+  ADD CONSTRAINT `fk_contracts_current_version` FOREIGN KEY (`current_version_id`) REFERENCES `contract_versions` (`id`),
+  ADD CONSTRAINT `fk_contracts_legal_approver` FOREIGN KEY (`legal_approved_by_company_user_id`) REFERENCES `company_users` (`id`);
 
 --
 -- Filtros para la tabla `contract_templates`
@@ -647,7 +672,14 @@ ALTER TABLE `contract_templates`
 --
 ALTER TABLE `contract_versions`
   ADD CONSTRAINT `fk_contract_versions_contract` FOREIGN KEY (`contract_id`) REFERENCES `contracts` (`id`),
+  ADD CONSTRAINT `fk_contract_versions_template` FOREIGN KEY (`template_id`) REFERENCES `contract_templates` (`id`),
   ADD CONSTRAINT `fk_contract_versions_created_by` FOREIGN KEY (`created_by_company_user_id`) REFERENCES `company_users` (`id`);
+
+--
+-- Filtros para la tabla `contract_signers`
+--
+ALTER TABLE `contract_signers`
+  ADD CONSTRAINT `fk_contract_signers_version` FOREIGN KEY (`contract_version_id`) REFERENCES `contract_versions` (`id`);
 
 --
 -- Filtros para la tabla `deliverables`
@@ -669,7 +701,14 @@ ALTER TABLE `deliverable_reviews`
 -- Filtros para la tabla `docusign_envelopes`
 --
 ALTER TABLE `docusign_envelopes`
-  ADD CONSTRAINT `fk_docusign_contract` FOREIGN KEY (`contract_id`) REFERENCES `contracts` (`id`);
+  ADD CONSTRAINT `fk_docusign_contract` FOREIGN KEY (`contract_id`) REFERENCES `contracts` (`id`),
+  ADD CONSTRAINT `fk_docusign_version` FOREIGN KEY (`contract_version_id`) REFERENCES `contract_versions` (`id`);
+
+--
+-- Filtros para la tabla `docusign_webhook_events`
+--
+ALTER TABLE `docusign_webhook_events`
+  ADD CONSTRAINT `fk_webhooks_version` FOREIGN KEY (`contract_version_id`) REFERENCES `contract_versions` (`id`);
 
 --
 -- Filtros para la tabla `exchange_rates`
@@ -733,6 +772,7 @@ ALTER TABLE `kyc_requests`
 ALTER TABLE `legal_approvals`
   ADD CONSTRAINT `fk_legal_approvals_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`),
   ADD CONSTRAINT `fk_legal_approvals_contract` FOREIGN KEY (`contract_id`) REFERENCES `contracts` (`id`),
+  ADD CONSTRAINT `fk_legal_approvals_version` FOREIGN KEY (`contract_version_id`) REFERENCES `contract_versions` (`id`),
   ADD CONSTRAINT `fk_legal_approvals_reviewer` FOREIGN KEY (`reviewed_by_company_user_id`) REFERENCES `company_users` (`id`);
 
 --

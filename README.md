@@ -49,6 +49,11 @@ Base de backend PHP con arquitectura limpia/hexagonal, estándares PSR y medidas
 - **Validación estricta**: usar `RequestValidator` en controladores para no confiar en la entrada del cliente.
 - **Soft delete**: tablas con columna `deleted_at` deben consultarse usando el alcance `withSoftDeleteScope()` en repositorios PDO.
 
+## Contratos y firma electrónica
+- Configura DocuSign con `DOCUSIGN_BASE_URI`, `DOCUSIGN_INTEGRATION_KEY`, `DOCUSIGN_ACCOUNT_ID`, `DOCUSIGN_USER_GUID` y `DOCUSIGN_WEBHOOK_SECRET` (HMAC usado en `DocusignWebhookController`).
+- Ajusta `CONTRACT_EXPIRATION_WARNING_DAYS` para el job de recordatorios (`NotifyExpiringContractsJob`).
+- Los sobres generados se registran en `docusign_envelopes` y los eventos validados en `docusign_webhook_events` junto con `contract_signers`.
+
 ## Autenticación y sesiones
 - **Password hashing**: `PASSWORD_ARGON2ID` (PHP 8.2+) en `PasswordHasher`.
 - **JWT**: `JwtTokenManager` emite *access tokens* con `iss`, `aud`, `sub` y `sid`; configura `JWT_SECRET`, `JWT_ACCESS_TTL` y `JWT_REFRESH_TTL_DAYS` en `.env`.
@@ -82,6 +87,7 @@ Base de backend PHP con arquitectura limpia/hexagonal, estándares PSR y medidas
 - **Freelancers**: `FreelancerController` expone alta y actualización de perfiles/skills (`CreateFreelancerUseCase`, `UpdateFreelancerProfileUseCase`) y un listado paginado que retorna perfil y habilidades.
 - **Projects**: `ProjectController` crea y actualiza proyectos multi-empresa, lista con paginación y agrega miembros (`AddProjectMemberUseCase`) para alinear con políticas de autorización.
 - **Assignments**: `AssignmentController` asigna freelancers a proyectos con rol, fechas y estado (`CreateAssignmentUseCase`) y lista asignaciones por proyecto (`ListAssignmentsByProjectUseCase`).
+- **Contratos y firmas**: `ContractController` publica plantillas (`CreateContractTemplateUseCase`), crea contratos multi-empresa desde plantillas (`CreateContractUseCase`), versiona documentos (`AddContractVersionUseCase`), envía a firma con DocuSign (`SendContractForSignatureUseCase`) y permite aprobaciones legales (`ApproveContractUseCase`). El webhook `DocusignWebhookController` valida la firma HMAC con `DOCUSIGN_WEBHOOK_SECRET` y actualiza estados de versiones/firmantes; el job `NotifyExpiringContractsJob` deja trazas y marca avisos sobre contratos próximos a vencer según `CONTRACT_EXPIRATION_WARNING_DAYS`.
 
 ## Flujo de desarrollo recomendado
 1. Implementa casos de uso en `app/Application` y entidades/value objects en `app/Domain`.

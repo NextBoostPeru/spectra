@@ -56,6 +56,12 @@ final class ReferenceDataSeeder extends AbstractSeed
                 ['code' => 'support.view', 'description' => 'Consultar tickets de soporte', 'scope' => 'company'],
                 ['code' => 'support.manage', 'description' => 'Atender tickets de soporte', 'scope' => 'company'],
             ],
+            'contracts' => [
+                ['code' => 'contracts.view', 'description' => 'Ver contratos y estados de firma', 'scope' => 'company'],
+                ['code' => 'contracts.manage', 'description' => 'Crear, versionar y enviar contratos', 'scope' => 'company'],
+                ['code' => 'contracts.sign', 'description' => 'Firmar contratos asignados', 'scope' => 'company'],
+                ['code' => 'contracts.approve_legal', 'description' => 'Aprobar legalmente contratos', 'scope' => 'company'],
+            ],
         ];
 
         $permissions = [];
@@ -104,6 +110,7 @@ final class ReferenceDataSeeder extends AbstractSeed
                         'requisitions.approve',
                         'purchase_orders.manage',
                         'timesheets.approve',
+                        'contracts.approve_legal',
                     ],
                 ],
                 'viewer' => [
@@ -113,6 +120,7 @@ final class ReferenceDataSeeder extends AbstractSeed
                         'requisitions.view',
                         'support.view',
                         'timesheets.review',
+                        'contracts.view',
                     ],
                 ],
                 'support' => [

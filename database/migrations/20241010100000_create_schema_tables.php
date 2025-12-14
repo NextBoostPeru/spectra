@@ -20,9 +20,9 @@ final class CreateSchemaTables extends AbstractMigration
         $tables = [
             'access_provisions', 'approval_policies', 'approval_requests', 'approval_rules', 'approval_steps',
             'assignments', 'attachments', 'attachment_links', 'audit_logs', 'bank_accounts', 'companies',
-            'company_contacts', 'company_settings', 'company_users', 'contracts', 'contract_templates',
+            'company_contacts', 'company_settings', 'company_users', 'contract_signers', 'contracts', 'contract_templates',
             'contract_versions', 'countries', 'currencies', 'deliverables', 'deliverable_reviews',
-            'docusign_envelopes', 'exchange_rates', 'freelancers', 'freelancer_profiles', 'freelancer_skills',
+            'docusign_envelopes', 'docusign_webhook_events', 'exchange_rates', 'freelancers', 'freelancer_profiles', 'freelancer_skills',
             'invoices', 'invoice_lines', 'kb_articles', 'kyb_requests', 'kyc_requests', 'legal_approvals',
             'notifications', 'nps_responses', 'nps_surveys', 'onboarding_checklists', 'onboarding_items',
             'onboarding_item_templates', 'payment_cycles', 'payouts', 'payroll_runs', 'payslips', 'permissions',

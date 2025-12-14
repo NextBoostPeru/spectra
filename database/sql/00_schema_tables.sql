@@ -286,6 +286,9 @@ CREATE TABLE `contracts` (
   `freelancer_id` char(36) NOT NULL,
   `template_id` char(36) NOT NULL,
   `jurisdiction_country_id` int(10) UNSIGNED NOT NULL,
+  `title` varchar(200) DEFAULT NULL,
+  `counterparty_name` varchar(190) DEFAULT NULL,
+  `counterparty_email` varchar(190) DEFAULT NULL,
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
   `notice_days` int(10) UNSIGNED NOT NULL DEFAULT 0,
@@ -293,9 +296,14 @@ CREATE TABLE `contracts` (
   `rate_amount` decimal(12,2) DEFAULT NULL,
   `rate_currency_id` int(10) UNSIGNED NOT NULL,
   `retainer_amount` decimal(12,2) DEFAULT NULL,
-  `status` enum('draft','sent','active','expiring','terminated') NOT NULL DEFAULT 'draft',
+  `current_version_id` char(36) DEFAULT NULL,
+  `status` enum('draft','pending_signature','active','expiring','terminated','declined') NOT NULL DEFAULT 'draft',
+  `legal_approved_by_company_user_id` char(36) DEFAULT NULL,
+  `legal_approved_at` timestamp NULL DEFAULT NULL,
+  `last_expiration_notified_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
+  `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -313,6 +321,7 @@ CREATE TABLE `contract_templates` (
   `title` varchar(200) NOT NULL,
   `body` longtext NOT NULL,
   `variables_schema` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`variables_schema`)),
+  `version` int(10) UNSIGNED NOT NULL DEFAULT 1,
   `status` enum('active','archived') NOT NULL DEFAULT 'active',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
@@ -327,9 +336,38 @@ CREATE TABLE `contract_templates` (
 CREATE TABLE `contract_versions` (
   `id` char(36) NOT NULL,
   `contract_id` char(36) NOT NULL,
+  `template_id` char(36) DEFAULT NULL,
+  `template_version` int(10) UNSIGNED DEFAULT NULL,
   `version_number` int(10) UNSIGNED NOT NULL,
   `body_snapshot` longtext NOT NULL,
+  `storage_path` varchar(255) DEFAULT NULL,
+  `document_hash` char(64) DEFAULT NULL,
+  `status` enum('draft','pending_signature','completed','declined','expired','voided','superseded') NOT NULL DEFAULT 'draft',
+  `docusign_envelope_id` varchar(120) DEFAULT NULL,
+  `sent_at` timestamp NULL DEFAULT NULL,
+  `signed_at` timestamp NULL DEFAULT NULL,
+  `expires_at` date DEFAULT NULL,
   `created_by_company_user_id` char(36) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `contract_signers`
+--
+
+CREATE TABLE `contract_signers` (
+  `id` char(36) NOT NULL,
+  `contract_version_id` char(36) NOT NULL,
+  `role` enum('internal','counterparty') NOT NULL DEFAULT 'counterparty',
+  `name` varchar(190) NOT NULL,
+  `email` varchar(190) NOT NULL,
+  `signer_type` enum('company_user','freelancer','contact') DEFAULT NULL,
+  `signer_id` char(36) DEFAULT NULL,
+  `docusign_recipient_id` varchar(120) DEFAULT NULL,
+  `status` enum('pending','viewed','signed','declined','failed') NOT NULL DEFAULT 'pending',
+  `signed_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -402,11 +440,30 @@ CREATE TABLE `deliverable_reviews` (
 CREATE TABLE `docusign_envelopes` (
   `id` char(36) NOT NULL,
   `contract_id` char(36) NOT NULL,
+  `contract_version_id` char(36) DEFAULT NULL,
   `envelope_id` varchar(120) NOT NULL,
   `status` enum('created','sent','viewed','completed','voided','declined') NOT NULL DEFAULT 'created',
   `last_event_at` timestamp NULL DEFAULT NULL,
   `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`payload`)),
+  `webhook_key` varchar(120) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `docusign_webhook_events`
+--
+
+CREATE TABLE `docusign_webhook_events` (
+  `id` char(36) NOT NULL,
+  `envelope_id` varchar(120) NOT NULL,
+  `contract_version_id` char(36) DEFAULT NULL,
+  `event_type` varchar(80) NOT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `signature_valid` tinyint(1) NOT NULL DEFAULT 0,
+  `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`payload`)),
+  `received_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -576,6 +633,7 @@ CREATE TABLE `legal_approvals` (
   `id` char(36) NOT NULL,
   `company_id` char(36) NOT NULL,
   `contract_id` char(36) NOT NULL,
+  `contract_version_id` char(36) DEFAULT NULL,
   `status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
   `reviewed_by_company_user_id` char(36) DEFAULT NULL,
   `reviewed_at` timestamp NULL DEFAULT NULL,
