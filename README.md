@@ -1,0 +1,68 @@
+# API básica en PHP
+
+Proyecto mínimo en PHP puro para exponer la base de datos definida en `mysql.txt` a través de un API REST genérico.
+
+## Requisitos
+- PHP 8+ con extensión PDO MySQL
+- Base de datos MySQL/MariaDB cargada con las tablas del archivo `mysql.txt`
+
+## Configuración
+1. Copia `config/config.php` y actualiza las credenciales de base de datos si es necesario.
+2. Asegúrate de que el usuario tenga permisos para consultar `information_schema` y acceder a las tablas del esquema.
+
+## Ejecución
+Puedes iniciar el servidor embebido de PHP apuntando al directorio `public`:
+
+```bash
+php -S localhost:8000 -t public
+```
+
+### Enrutamiento del API
+- No existe una carpeta física `/api`; todas las rutas pasan por `public/index.php` y desde ahí se despachan a los controladores.
+- El repositorio incluye `public/.htaccess` con las reglas de reescritura necesarias para Apache. Si usas Nginx u otro servidor, configura un rewrite para que cualquier ruta inexistente bajo `/api/*` termine en `public/index.php`.
+
+## Uso del API
+Las rutas siguen el patrón `/api/{tabla}`:
+
+- `GET /api/{tabla}`: Lista registros con paginación (`limit` y `offset`).
+- `GET /api/{tabla}/{id}`: Obtiene un registro por clave primaria.
+- `POST /api/{tabla}`: Crea un registro usando un cuerpo JSON con los campos de la tabla.
+- `PUT/PATCH /api/{tabla}/{id}`: Actualiza campos del registro indicado.
+- `DELETE /api/{tabla}/{id}`: Elimina el registro.
+
+El API valida que la tabla exista, infiere columnas y llave primaria desde `information_schema`, y omite campos desconocidos en inserciones/actualizaciones.
+
+### Login
+- `POST /api/login` con cuerpo JSON `{ "email": "correo", "password": "secreto" }` devuelve el usuario y un token de sesión efímero.
+- El endpoint actualiza `last_login_at` del usuario y responde 401 cuando las credenciales no son válidas.
+
+### Registro temporal de administrador
+- `POST /api/register` con cuerpo `{ "full_name": "Nombre", "email": "correo", "password": "secreto" }` crea un usuario activo con rol `super_admin`.
+- Pensado solo para el arranque inicial; elimina o deshabilita la ruta cuando ya cuentes con cuentas reales.
+
+### Gestión de empresas (tenants)
+- `GET /api/tenants` lista empresas con su idioma, zona horaria, moneda base, balance de wallet y contadores de facturas, nómina, proyectos y contratos.
+- `POST /api/tenants` crea una empresa con configuración base, ciclo de pago y reglas de fees opcionales. El payload admite contactos iniciales.
+- `GET /api/tenants/{id}` devuelve el detalle, contactos, wallet, últimas facturas, nóminas, proyectos, contratos y ciclo de pago activo.
+- `PUT /api/tenants/{id}` actualiza razón social, país, moneda, idioma, zona horaria y reglas de fees.
+- `POST /api/tenants/{id}/status` activa o suspende con un motivo (queda auditado en `audit_logs`).
+- `POST /api/tenants/{id}/contacts` crea contactos de billing/operaciones/legal; `PUT /api/tenants/{id}/contacts/{contactId}` permite editarlos.
+- `POST /api/tenants/{id}/impersonate` genera un token temporal de soporte (1h) y registra el evento en `audit_logs`.
+
+## Frontend en React
+Hay dos opciones disponibles en la carpeta `frontend/`:
+
+1. **SPA en React (recomendada):**
+   - Instala dependencias (requiere acceso a npm):
+     ```bash
+     cd frontend
+     npm install
+     npm run dev -- --host
+     ```
+   - Abre el navegador en `http://localhost:5173` y usa el formulario de inicio de sesión o el registro temporal. El color principal del UI es `#006d71` y se usa la tipografía Poppins.
+   - Configura la variable `VITE_API_URL` (por ejemplo, `https://appspectra.nextboostperu.com`). Si apuntas al dominio `appspectra.nextboostperu.com` aunque uses `http`, la SPA fuerza `https` para evitar redirecciones que rompen el preflight CORS; sin valor, usa automáticamente ese host en `https` cuando detecta `nextboostperu.com` o recurre a `http://localhost:8000` para desarrollo local.
+   - Para evitar bloqueos de preflight en proxies externos, las peticiones de login y registro usan formularios `application/x-www-form-urlencoded` en lugar de JSON. El backend acepta ambos formatos.
+   - Al iniciar sesión se guarda el token y se redirige a un dashboard básico que muestra el nombre, correo y rol del usuario junto con próximos pasos.
+
+2. **HTML estático anterior:**
+   - Se mantiene `frontend/login.html` con React + Tailwind vía CDN. Úsalo si no quieres instalar dependencias; indica manualmente la URL del endpoint `/api/login`.

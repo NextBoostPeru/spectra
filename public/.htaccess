@@ -1,0 +1,6 @@
+RewriteEngine On
+
+# Send all requests to the front controller so /api/* routes work without physical directories
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]
